@@ -1,0 +1,74 @@
+Run,Brand,Compound,Dimensions,Item,DataOrigin,Run,RimWidth
+2,Hoosier,R20,16x7.5-10,item  43075,TTC Round 9,run  2,7 inch
+4,Hoosier,R20,16x7.5-10,item  43075,TTC Round 9,run  4,7 inch
+5,Hoosier,R20,16x7.5-10,item  43075,TTC Round 9,run  5,7 inch
+6,Hoosier,R20,16x7.5-10,item  43075,TTC Round 9,run  6,7 inch
+7,Hoosier,R20,16x7.5-10,item  43075,TTC Round 9,run  7,8 inch
+8,Hoosier,R20,16x7.5-10,item  43075,TTC Round 9,run  8,8 inch
+9,Hoosier,R20,16x7.5-10,item  43075,TTC Round 9,run  9,8 inch
+10,Hoosier,R20,16x6.0-10,item  43070,TTC Round 9,run  10,6 inch
+11,Hoosier,R20,16x6.0-10,item  43070,TTC Round 9,run  11,6 inch
+12,Hoosier,R20,16x6.0-10,item  43070,TTC Round 9,run  12,6 inch
+13,Hoosier,R20,16x6.0-10,item  43070,TTC Round 9,run  13,7 inch
+14,Hoosier,R20,16x6.0-10,item  43070,TTC Round 9,run  14,7 inch
+15,Hoosier,R20,16x6.0-10,item  43070,TTC Round 9,run  15,7 inch
+16,Hoosier,R20,20.5x7.0-13,item  43164,TTC Round 9,run  16,7 inch
+17,Hoosier,R20,20.5x7.0-13,item  43164,TTC Round 9,run  17,7 inch
+18,Hoosier,R20,20.5x7.0-13,item  43164,TTC Round 9,run  18,7 inch
+19,Hoosier,R20,20.5x7.0-13,item  43164,TTC Round 9,run  19,8 inch
+20,Hoosier,R20,20.5x7.0-13,item  43164,TTC Round 9,run  20,8 inch
+21,Hoosier,R20,20.5x7.0-13,item  43164,TTC Round 9,run  21,8 inch
+22,Goodyear,FSAE,20x7.0-13,D2704,TTC Round 9,run  22,7 inch
+23,Goodyear,FSAE,20x7.0-13,D2704,TTC Round 9,run  23,7 inch
+24,Goodyear,FSAE,20x7.0-13,D2704,TTC Round 9,run  24,7 inch
+25,Goodyear,FSAE,20x7.0-13,D2704,TTC Round 9,run  25,8 inch
+27,Hoosier,R20,18x6.0-10,item  43100,TTC Round 9,run  27,6 inch
+28,Hoosier,R20,18x6.0-10,item  43100,TTC Round 9,run  28,6 inch
+29,Hoosier,R20,18x6.0-10,item  43100,TTC Round 9,run  29,6 inch
+30,Hoosier,R20,18x6.0-10,item  43100,TTC Round 9,run  30,7 inch
+31,Hoosier,R20,18x6.0-10,item  43100,TTC Round 9,run  31,7 inch
+32,Hoosier,R20,18x6.0-10,item  43100,TTC Round 9,run  32,7 inch
+33,Goodyear,FSAE,18x6.5-10,D0571,TTC Round 9,run  33,6 inch
+34,Goodyear,FSAE,18x6.5-10,D0571,TTC Round 9,run  34,6 inch
+35,Goodyear,FSAE,18x6.5-10,D0571,TTC Round 9,run  35,6 inch
+36,Goodyear,FSAE,18x6.5-10,D0571,TTC Round 9,run  36,7 inch
+37,Goodyear,FSAE,18x6.5-10,D0571,TTC Round 9,run  37,7 inch
+38,Goodyear,FSAE,18x6.5-10,D0571,TTC Round 9,run  38,7 inch
+39,MRF,ZTD1,18x6.0-10,FSAE,TTC Round 9,run  39,6 inch
+40,MRF,ZTD1,18x6.0-10,FSAE,TTC Round 9,run  40,6 inch
+41,MRF,ZTD1,18x6.0-10,FSAE,TTC Round 9,run  41,6 inch
+42,MRF,ZTD1,18x6.0-10,FSAE,TTC Round 9,run  42,7 inch
+43,MRF,ZTD1,18x6.0-10,FSAE,TTC Round 9,run  43,7 inch
+44,MRF,ZTD1,18x6.0-10,FSAE,TTC Round 9,run  44,7 inch
+46,Goodyear,FSAE,20x7.0-13,D2704,TTC Round 9,run  46,8 inch
+49,Goodyear,FSAE,20x7.0-13,D2704,TTC Round 9,run  49,8 inch
+50,Hoosier,R20,20.5x7.0-13,item  43164,TTC Round 9,run  50,7 inch
+51,Hoosier,R20,20.5x7.0-13,item  43164,TTC Round 9,run  51,7 inch
+52,Hoosier,R20,20.5x7.0-13,item  43164,TTC Round 9,run  52,7 inch
+53,Hoosier,R20,20.5x7.0-13,item  43164,TTC Round 9,run  53,8 inch
+54,Hoosier,R20,20.5x7.0-13,item  43164,TTC Round 9,run  54,8 inch
+55,Hoosier,R20,20.5x7.0-13,item  43164,TTC Round 9,run  55,8 inch
+56,Goodyear,FSAE,20x7.0-13,D2704,TTC Round 9,run  56,7 inch
+57,Goodyear,FSAE,20x7.0-13,D2704,TTC Round 9,run  57,7 inch
+58,Goodyear,FSAE,20x7.0-13,D2704,TTC Round 9,run  58,7 inch
+59,Goodyear,FSAE,20x7.0-13,D2704,TTC Round 9,run  59,8 inch
+60,Goodyear,FSAE,20x7.0-13,D2704,TTC Round 9,run  60,8 inch
+61,Goodyear,FSAE,20x7.0-13,D2704,TTC Round 9,run  61,8 inch
+62,MRF,ZTD1,18x6.0-10,FSAE,TTC Round 9,run  62,6 inch
+63,MRF,ZTD1,18x6.0-10,FSAE,TTC Round 9,run  63,6 inch
+64,MRF,ZTD1,18x6.0-10,FSAE,TTC Round 9,run  64,6 inch
+65,MRF,ZTD1,18x6.0-10,FSAE,TTC Round 9,run  65,7 inch
+66,MRF,ZTD1,18x6.0-10,FSAE,TTC Round 9,run  66,7 inch
+67,MRF,ZTD1,18x6.0-10,FSAE,TTC Round 9,run  67,7 inch
+68,Hoosier,R20,18x6.0-10,item  43100,TTC Round 9,run  68,6 inch
+69,Hoosier,R20,18x6.0-10,item  43100,TTC Round 9,run  69,6 inch
+70,Hoosier,R20,18x6.0-10,item  43100,TTC Round 9,run  70,6 inch
+71,Hoosier,R20,18x6.0-10,item  43100,TTC Round 9,run  71,7 inch
+72,Hoosier,R20,18x6.0-10,item  43100,TTC Round 9,run  72,7 inch
+73,Hoosier,R20,18x6.0-10,item  43100,TTC Round 9,run  73,7 inch
+74,Goodyear,FSAE,18x6.5-10,D0571,TTC Round 9,run  74,6 inch
+75,Goodyear,FSAE,18x6.5-10,D0571,TTC Round 9,run  75,6 inch
+76,Goodyear,FSAE,18x6.5-10,D0571,TTC Round 9,run  76,6 inch
+77,Goodyear,FSAE,18x6.5-10,D0571,TTC Round 9,run  77,7 inch
+78,Goodyear,FSAE,18x6.5-10,D0571,TTC Round 9,run  78,7 inch
+79,Goodyear,FSAE,18x6.5-10,D0571,TTC Round 9,run  79,7 inch
