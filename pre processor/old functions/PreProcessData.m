@@ -12,11 +12,11 @@ function new_data = PreProcessData(data, Tyre, FigName, StepSize, PlotFigs)
     y = zeros(size(z));
     
     % add to plot
-    %if PlotFigs == 1
+    if Settings.PlotFigs == 1
         figure(FigName);
         subplot(7,1,1);
         plot(z, y, 'r*'); hold on;
-    %end
+    end
 
     %% Splicing data into individual sweeps
     q = 0;
