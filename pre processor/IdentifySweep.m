@@ -1,4 +1,4 @@
-function [z, Figures] = IdentifySweep(data, Figures, Settings)
+function [z_new, Figures] = IdentifySweep(data, Figures, Settings)
 
     % fit spline to slip angle channel
     sp = spline(data.IDX, data.SA);

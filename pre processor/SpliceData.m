@@ -1,81 +1,170 @@
-function [CleanData] = SpliceData(RawData, Settings)
+function [CleanData, RawData, SummaryData, Figures] = SpliceData(RawData, Settings, Figures, z)
+
     % initialise new index vector
     q = 0;
     
     % loop over every sweep
-    for n = 1:length(z)-3
-        if mod(n,2) == 0
+    for i = 1:length(z) - 1
+    
+        % select subset of data corresponding to single sweep
+        fn = RawData.channel.name;
         
-            % select subset of data
-            sa = RawData.SA(z(n+1):z(n+3)-3);
-            fx = RawData.FX(z(n+1):z(n+3)-3);
-            fy = RawData.FY(z(n+1):z(n+3)-3);
-            fz = RawData.FZ(z(n+1):z(n+3)-3);
-            mz = RawData.MZ(z(n+1):z(n+3)-3);
-            mx = RawData.MX(z(n+1):z(n+3)-3);
-            rl = RawData.RL(z(n+1):z(n+3)-3);
-            ia = RawData.IA(z(n+1):z(n+3)-3);
-            p  = RawData.P(z(n+1):z(n+3)-3);
-        
-            % calculate average camber and pressure
-            ia_avg = round(mean(ia), 3);
-            p_avg  = round(mean(p), 3);
-            fz_avg = round(mean(fz), 0);
+        % extract data for single sweep
+        for j = 1:numel(fn)
+            NewData.(fn{j}) = RawData.(fn{j})(z(i):z(i+1));
+        end
 
+        % ambtmp  = RawData.AMBTMP(z(i):z(i+1));  %
+        % et      = RawData.ET(z(i):z(i+1));      %
+        % fx      = RawData.FX(z(i):z(i+1));      %
+        % fy      = RawData.FY(z(i):z(i+1));      % done
+        % fz      = RawData.FZ(z(i):z(i+1));      % done
+        % ia      = RawData.IA(z(i):z(i+1));      % done
+        % mx      = RawData.MX(z(i):z(i+1));      % done
+        % my      = RawData.MY(z(i):z(i+1));      %
+        % mz      = RawData.MZ(z(i):z(i+1));      % done
+        % n       = RawData.N(z(i):z(i+1));       %
+        % p       = RawData.P(z(i):z(i+1));       % done
+        % re      = RawData.RE(z(i):z(i+1));      %
+        % rl      = RawData.RL(z(i):z(i+1));      %
+        % rst     = RawData.RST(z(i):z(i+1));     %
+        % SA      = RawData.SA(z(i):z(i+1));      % done
+        % sl      = RawData.SL(z(i):z(i+1));      %
+        % tstc    = RawData.TSTC(z(i):z(i+1));    %
+        % tsti    = RawData.TSTI(z(i):z(i+1));    %
+        % tsto    = RawData.TSTO(z(i):z(i+1));    %
+        % v       = RawData.V(z(i):z(i+1));       %
+        % d       = RawData.D(z(i):z(i+1));       %
+        
+        if max(NewData.SA) > 1
+            % calculate average of variables held constant
+            ia_avg = 2*round(mean(0.5*NewData.IA), 0);                                  % camber
+            p_avg  = 20*round(mean(0.05*NewData.P), 2 , 'Significant');                 % pressure
+            fz_avg = 10*round(mean(0.1*NewData.FZ), 0);                                 % vertical load
+            v_avg  = round(mean(NewData.V),1);                                          % velocity
+            
+            % clean up channels that were supposed to be constant
+            RawData.IA(z(i):z(i+1)) = ia_avg;
+            RawData.P(z(i):z(i+1))  = p_avg;
+            RawData.FZ(z(i):z(i+1)) = fz_avg;
+    
             % fit a smoothed spline to the channels
-            sp_fy = csaps(sa, fy, Settings.Smoothing);
-            sp_mx = csaps(sa, mx, Settings.Smoothing);
-            sp_mz = csaps(sa, mz, Settings.Smoothing);
-            sp_rl = csaps(sa, rl, Settings.Smoothing);
+            sp_fx = csaps(NewData.SA, NewData.FX, Settings.Smoothing);
+            sp_fy = csaps(NewData.SA, NewData.FY, Settings.Smoothing);
+            sp_mx = csaps(NewData.SA, NewData.MX, Settings.Smoothing);
+    
+            if Settings.UseOldMyCalc == 1
+                sp_my = csaps(NewData.SA, NewData.MY, Settings.Smoothing);
+            end
+            sp_mz = csaps(NewData.SA, NewData.MZ, Settings.Smoothing);
+            %sp_rl = csaps(sa, rl, Settings.Smoothing);
         
-            % plot one of the segments to check
-            if isequal(n, 14) & Settings.PlotFigs == 1
-                figtitle1 = Tyre.Brand + " " + Tyre.Item + " " + Tyre.Dimensions + " (" + Tyre.Compound + " compound) on " + Tyre.RimWidth + " rim";
-                figtitle2 = "Camber = " + num2str(round(ia_avg, 1)) + " deg | pressure = " + num2str(round(p_avg, 2)) + " bar | Fz = " + num2str(round(mean(fz), 0)) + " N";
-                figure('Name', figtitle2);
+            %% plot one of the segments to check
+            if isequal(i, 2) %& Settings.PlotFigs == 1
+                figtitle1 = [RawData.source, ' (run ', num2str(RawData.RUN(1)), ')'];
+                figtitle2 = [RawData.tireid, ' | ', RawData.testid, ' | Camber = ', num2str(ia_avg), ' deg | pressure = ', num2str(p_avg), ' bar | Fz = ', num2str(fz_avg), ' N'];
                 
-                sgtitle({figtitle1, figtitle2});
-                subplot(3,1,1); hold on; grid on;
-                    plot(sa, fy, 'b.');
-                    fnplt(sp_fy, 'r-');
-                    xlabel('slip angle (deg)');
-                    ylabel('side force (N)');
-                subplot(3,1,2); hold on; grid on;
-                    plot(sa, mx, 'b.');
-                    fnplt(sp_mx, 'r-');
-                    xlabel('slip angle (deg)');
-                    ylabel('overturning moment (Nm)');
-                subplot(3,1,3); hold on; grid on;
-                    plot(sa, mz, 'b.');
-                    fnplt(sp_mz, 'r-');
-                    xlabel('slip angle (deg)');
-                    ylabel('self-aligning moment (Nm)');
-        
-                figure;
+                Figures.CleanDataCond = figure('Name', 'Data cleaning - test segment');
                     sgtitle({figtitle1, figtitle2});
-                    plot3(fz, sa, fy, '.', 'MarkerSize', 1); 
-                    hold on; grid on;
-                    xlabel('Vertical load (N)');
-                    ylabel('Slip angle (deg)');
-                    zlabel('Side force (N)');
+                    if RawData.testid == "Cornering" && Settings.UseOldMyCalc == 1
+                        subplot(2,2,1); hold on; grid on;
+                            plot(NewData.SA, NewData.FY, 'b.');
+                            fnplt(sp_fy, 'r-');
+                            xlabel('SA (deg)');
+                            ylabel('FY (N)');
+                        subplot(2,2,2); hold on; grid on;
+                            plot(NewData.SA, NewData.MX, 'b.');
+                            fnplt(sp_mx, 'r-');
+                            xlabel('SA (deg)');
+                            ylabel('MX (Nm)');
+                        subplot(2,2,3); hold on; grid on;
+                            plot(NewData.SA, NewData.MY, 'b.');
+                            fnplt(sp_my, 'r-');
+                            xlabel('SA (deg)');
+                            ylabel('MY (Nm)');
+                        subplot(2,2,4); hold on; grid on;
+                            plot(NewData.SA, NewData.MZ, 'b.');
+                            fnplt(sp_mz, 'r-');
+                            xlabel('SA (deg)');
+                            ylabel('MZ (Nm)');
+                    elseif RawData.testid == "Cornering" && Settings.UseOldMyCalc == 0
+                        subplot(1,3,1); hold on; grid on;
+                            plot(NewData.SA, NewData.FY, 'b.');
+                            fnplt(sp_fy, 'r-');
+                            xlabel('SA (deg)');
+                            ylabel('FY (N)');
+                        subplot(1,3,2); hold on; grid on;
+                            plot(NewData.SA, NewData.MX, 'b.');
+                            fnplt(sp_mx, 'r-');
+                            xlabel('SA (deg)');
+                            ylabel('MX (Nm)');
+                        subplot(1,3,3); hold on; grid on;
+                            plot(NewData.SA, NewData.MZ, 'b.');
+                            fnplt(sp_mz, 'r-');
+                            xlabel('SA (deg)');
+                            ylabel('MZ (Nm)');
+                    else
+                        subplot(1,3,1); hold on; grid on;
+                            plot(NewData.SL, NewData.FX, 'b.');
+                            fnplt(sp_fx, 'r-');
+                            xlabel('slip angle (deg)');
+                            ylabel('side force (N)');
+                        subplot(1,3,2); hold on; grid on;
+                            plot(NewData.SL, NewData.MX, 'b.');
+                            fnplt(sp_mx, 'r-');
+                            xlabel('slip angle (deg)');
+                            ylabel('overturning moment (Nm)');
+                        subplot(1,3,3); hold on; grid on;
+                            plot(NewData.SL, NewData.MZ, 'b.');
+                            fnplt(sp_mz, 'r-');
+                            xlabel('slip angle (deg)');
+                            ylabel('self-aligning moment (Nm)');
+                    end
+    
+    
             end
         
-            % store smoothed data in new table
-            for sl = 1+floor(min(sa)):Settings.StepSize:ceil(max(sa))-1
+            %% store smoothed data in new structure
+            for j = 1+floor(min(NewData.SA)):Settings.StepSize:ceil(max(NewData.SA))-1
                 q = q + 1;
-                CleanData(q, 1) = q;
-                CleanData(q, 2) = sl;
-                CleanData(q, 3) = 2*round(mean(0.5*ia), 0);
-                CleanData(q, 4) = 20*round(mean(0.05*p), 2 , 'Significant');
-                CleanData(q, 5) = fz_avg;
-                CleanData(q, 6) = fnval(sp_fy, sl);
-                CleanData(q, 7) = fnval(sp_mx, sl);
-                CleanData(q, 8) = fnval(sp_mz, sl);
+                CleanData.IDX(q) = q;
+                CleanData.SA(q) = j;
+                %CleanData.SL(q) = j;
+                CleanData.IA(q) = ia_avg;
+                CleanData.P(q)  = p_avg;
+                CleanData.FX(q) = fnval(sp_fx, j);
+                CleanData.FY(q) = fnval(sp_fy, j);
+                CleanData.FZ(q) = fz_avg;
+                CleanData.MX(q) = fnval(sp_mx, j);
+                %CleanData.MY(q) = fnval(sp_my, j);
+                CleanData.MZ(q) = fnval(sp_mz, j);
+                CleanData.V(q)  = v_avg;
         
             end
 
-            VariableNames = ["N", "SA", "IA", "P", "FZ", "FY", "MX", "MZ"];
-            CleanData = array2table(CleanData, "VariableNames", VariableNames);
+            %% create summary data structure
+            
+            % evaluation vector
+            eval = 1+floor(min(NewData.SA)):Settings.StepSize:ceil(max(NewData.SA))-1;
+    
+            fy_max = max(fnval(sp_fy, eval));
+            fy_min = min(fnval(sp_fy, eval));
+            SummaryData.MUY1(i) = fy_max(1)/fz_avg;
+            SummaryData.MUY2(i) = fy_min(1)/fz_avg;
+            SummaryData.P(i) = p_avg;
+            SummaryData.IA(i) = ia_avg;
+            SummaryData.FZ(i) = fz_avg;
         end
     end
+
+    % add metadata to structure
+    CleanData.source    = RawData.source;
+    CleanData.testid    = RawData.testid;
+    CleanData.tireid    = RawData.tireid;
+    CleanData.channel   = RawData.channel;
+
+    % display dataset reduction
+    reduction = numel(CleanData.IDX)/numel(RawData.IDX)*100;
+    disp(['Reduced dataset to ', num2str(round(reduction, 1)), '% of its original size!']);
+end
 

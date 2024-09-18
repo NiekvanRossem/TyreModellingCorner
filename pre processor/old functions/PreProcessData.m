@@ -46,23 +46,23 @@ function new_data = PreProcessData(data, Tyre, FigName, StepSize, PlotFigs)
             %sp_rl = csaps(sa, rl, 0.1);
         
             % plot one of the segments to check
-            if isequal(n, 14) %& PlotFigs == 1
+            if isequal(n, 2) %& PlotFigs == 1
                 figtitle1 = Tyre.Brand + " " + Tyre.Item + " " + Tyre.Dimensions + " (" + Tyre.Compound + " compound) on " + Tyre.RimWidth + " rim";
                 figtitle2 = "Camber = " + num2str(round(ia_avg, 1)) + " deg | pressure = " + num2str(round(p_avg, 2)) + " bar | Fz = " + num2str(round(mean(fz), 0)) + " N";
                 figure('Name', figtitle2);
                 
                 sgtitle({figtitle1, figtitle2});
-                subplot(3,1,1); hold on; grid on;
+                subplot(1,3,1); hold on; grid on;
                     plot(sa, fy, 'b.');
                     fnplt(sp_fy, 'r-');
                     xlabel('slip angle (deg)');
                     ylabel('side force (N)');
-                subplot(3,1,2); hold on; grid on;
+                subplot(1,3,2); hold on; grid on;
                     plot(sa, mx, 'b.');
                     fnplt(sp_mx, 'r-');
                     xlabel('slip angle (deg)');
                     ylabel('overturning moment (Nm)');
-                subplot(3,1,3); hold on; grid on;
+                subplot(1,3,3); hold on; grid on;
                     plot(sa, mz, 'b.');
                     fnplt(sp_mz, 'r-');
                     xlabel('slip angle (deg)');

@@ -17,11 +17,35 @@ function [data, Tyre, Figures] = LoadTyreData(Round, Run, Settings)
         disp('Round no. invalid or not yet implemented');
     end
 
-    % create filename for TTC datafile
-    filename = RunCode + num2str(Run) + ".mat";
+    % create empty data variable
+    data = [];
 
-    % Hoosier 16x7.5-R10 (R20 compound) Lateral tests from round 9
-    data = load(filename);
+    
+    % loop over selected runs
+    for i = 1:length(Run)
+
+        % create filename for TTC datafile
+        filename = RunCode + num2str(Run(i)) + ".mat";
+
+        % load datafile
+        temp = load(filename);
+
+        % for importing multiple runs, loop over all the fields in the
+        % structure, and append the extra data
+        if i > 1
+
+            % create array with fieldnames
+            fn = fieldnames(data);
+            fn(end-3:end) = [];
+            
+            % loop over all field names, and append the data
+            for j = 1:numel(fn)
+                data.(fn{j}) = vertcat(data.(fn{j}), temp.(fn{j}));
+            end
+        else
+            data = temp;
+        end
+    end
     
     % invert loads for proper SAE axis system
     data.FZ = -data.FZ;
@@ -35,19 +59,36 @@ function [data, Tyre, Figures] = LoadTyreData(Round, Run, Settings)
     data.RL = data.RL/1e2;      % loaded radius from cm to m
 
     % create rolling resistance moment channel (cornering only)
-    if data.testid == "Cornering"
+    if data.testid == "Cornering" && Settings.UseOldMyCalc == 1
         data.MY = data.FX.*data.RL;
+        data.channel.name = [data.channel.name, "MY"];
     end
 
-    % create index vector
+    % create index channel
     data.IDX = linspace(1, length(data.SA), length(data.SA))';
-    
-    % remove break-in procedure (select range manually)
-    %range = 1:Settings.BreakIn;
-    %data(range, :) = [];
-    
+    data.channel.name = [data.channel.name, "IDX"];
+
+    % correct ET channel start time
+    data.ET = data.ET - data.ET(1);
+
+    % create distance channel by integrating the velocity channel
+    data.D = zeros(size(data.ET));
+
+    for n = 1:length(data.ET)
+
+        % set initial distance to zero
+        if n == 1
+            data.D(n) = 0;
+
+        % Trapezoidal rule for every other datapoint
+        else
+            data.D(n) = data.D(n-1) + ((data.ET(n) - data.ET(n-1))/2)*(data.V(n-1) + data.V(n));
+        end
+    end
+    data.channel.name = [data.channel.name, "D"];
+  
     % metadata
-    index = database.Run == Run;
+    index = database.Run == Run(1);
     Tyre.Brand      = string(database.Brand(index));
     Tyre.Compound   = string(database.Compound(index));
     Tyre.Dimensions = string(database.Dimensions(index));
@@ -112,7 +153,7 @@ function [data, Tyre, Figures] = LoadTyreData(Round, Run, Settings)
         % 3rd figure (moments)
         Figures.RawMoments = figure("Name", "Raw data - Moments");
         sgtitle({figtitle1, figtitle2});
-        if data.testid == "Cornering"
+        if data.testid == "Cornering" && Settings.UseOldMyCalc == 1
             subplot(4,1,1); hold all; grid on;
                 plot(data.IDX, data.SA, '.', 'MarkerSize', 1); 
                 xlim([data.IDX(1) data.IDX(end)]);
@@ -126,6 +167,19 @@ function [data, Tyre, Figures] = LoadTyreData(Round, Run, Settings)
                 xlim([data.IDX(1) data.IDX(end)]);
                 title("MY (Nm)");                
             subplot(4,1,4); hold all; grid on;
+                plot(data.IDX, data.MZ, '.', 'MarkerSize', 1); 
+                xlim([data.IDX(1) data.IDX(end)]);
+                title("MZ (Nm)");
+        elseif data.testid == "Cornering" && Settings.UseOldMyCalc == 0
+            subplot(3,1,1); hold all; grid on;
+                plot(data.IDX, data.SA, '.', 'MarkerSize', 1); 
+                xlim([data.IDX(1) data.IDX(end)]);
+                title("SA (deg)");
+            subplot(3,1,2); hold all; grid on;
+                plot(data.IDX, data.MX, '.', 'MarkerSize', 1); 
+                xlim([data.IDX(1) data.IDX(end)]);
+                title("MX (Nm)");
+            subplot(3,1,3); hold all; grid on;
                 plot(data.IDX, data.MZ, '.', 'MarkerSize', 1); 
                 xlim([data.IDX(1) data.IDX(end)]);
                 title("MZ (Nm)");
