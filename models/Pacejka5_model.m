@@ -39,11 +39,13 @@ function out = Pacejka5_model(P, X)
         SV = 0;
     end
 
+    X(:,2) = abs(X(:,2));
+
     % calculate peak factor
-    D = (P(1) + P(2)./1000.*X(:,2)).*X(:,2);
+    D = (P(1) + P(2)/1000.*X(:,2)).*X(:,2);
 
     % calculate output
-    out = D.*sin((P(4) + (P(5)./1000.*X(:,2))).*atan(P(3).*(X(:,1)))) + SV;
+    out = D.*sin((P(4) + (P(5)/1000.*X(:,2))).*atan(P(3).*(X(:,1)))) + SV;
 
 end
 
