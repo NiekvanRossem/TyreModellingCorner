@@ -36,26 +36,25 @@ function [CleanData, RawData, SummaryData, Figures] = SpliceData(RawData, Settin
         % v       = RawData.V(z(i):z(i+1));       %
         % d       = RawData.D(z(i):z(i+1));       %
         
-        if max(NewData.SA) > 1
+        if max(NewData.SA) > 1  % filter out sweeps where nothing happens
+
             % calculate average of variables held constant
-            ia_avg = 2*round(mean(0.5*NewData.IA), 0);                                  % camber
-            p_avg  = 20*round(mean(0.05*NewData.P), 2 , 'Significant');                 % pressure
-            fz_avg = 10*round(mean(0.1*NewData.FZ), 0);                                 % vertical load
-            v_avg  = round(mean(NewData.V),1);                                          % velocity
+            ia_avg = 2*round(mean(0.5*NewData.IA), 0);                      % inclination angle
+            p_avg  = 20*round(mean(0.05*NewData.P), 2 , 'Significant');     % pressure
+            fz_avg = 10*round(mean(0.1*NewData.FZ), 0);                     % vertical load
+            v_avg  = round(mean(NewData.V),1);                              % velocity
             
             % clean up channels that were supposed to be constant
-            RawData.IA(z(i):z(i+1)) = ia_avg;
-            RawData.P(z(i):z(i+1))  = p_avg;
-            RawData.FZ(z(i):z(i+1)) = fz_avg;
-    
+            RawData.IA(z(i):z(i+1)) = ia_avg;                               % inclination angle
+            RawData.P(z(i):z(i+1))  = p_avg;                                % pressure
+            RawData.FZ(z(i):z(i+1)) = fz_avg;                               % vertical load
+            RawData.V(z(i):z(i+1))  = v_avg;                                % velocity
+
             % fit a smoothed spline to the channels
             sp_fx = csaps(NewData.SA, NewData.FX, Settings.Smoothing);
             sp_fy = csaps(NewData.SA, NewData.FY, Settings.Smoothing);
             sp_mx = csaps(NewData.SA, NewData.MX, Settings.Smoothing);
     
-            if Settings.UseOldMyCalc == 1
-                sp_my = csaps(NewData.SA, NewData.MY, Settings.Smoothing);
-            end
             sp_mz = csaps(NewData.SA, NewData.MZ, Settings.Smoothing);
             %sp_rl = csaps(sa, rl, Settings.Smoothing);
         
@@ -66,28 +65,7 @@ function [CleanData, RawData, SummaryData, Figures] = SpliceData(RawData, Settin
                 
                 Figures.CleanDataCond = figure('Name', 'Data cleaning - test segment');
                     sgtitle({figtitle1, figtitle2});
-                    if RawData.testid == "Cornering" && Settings.UseOldMyCalc == 1
-                        subplot(2,2,1); hold on; grid on;
-                            plot(NewData.SA, NewData.FY, 'b.');
-                            fnplt(sp_fy, 'r-');
-                            xlabel('SA (deg)');
-                            ylabel('FY (N)');
-                        subplot(2,2,2); hold on; grid on;
-                            plot(NewData.SA, NewData.MX, 'b.');
-                            fnplt(sp_mx, 'r-');
-                            xlabel('SA (deg)');
-                            ylabel('MX (Nm)');
-                        subplot(2,2,3); hold on; grid on;
-                            plot(NewData.SA, NewData.MY, 'b.');
-                            fnplt(sp_my, 'r-');
-                            xlabel('SA (deg)');
-                            ylabel('MY (Nm)');
-                        subplot(2,2,4); hold on; grid on;
-                            plot(NewData.SA, NewData.MZ, 'b.');
-                            fnplt(sp_mz, 'r-');
-                            xlabel('SA (deg)');
-                            ylabel('MZ (Nm)');
-                    elseif RawData.testid == "Cornering" && Settings.UseOldMyCalc == 0
+                    if RawData.testid == "Cornering"
                         subplot(1,3,1); hold on; grid on;
                             plot(NewData.SA, NewData.FY, 'b.');
                             fnplt(sp_fy, 'r-');
@@ -120,8 +98,6 @@ function [CleanData, RawData, SummaryData, Figures] = SpliceData(RawData, Settin
                             xlabel('slip angle (deg)');
                             ylabel('self-aligning moment (Nm)');
                     end
-    
-    
             end
         
             %% store smoothed data in new structure
@@ -139,7 +115,6 @@ function [CleanData, RawData, SummaryData, Figures] = SpliceData(RawData, Settin
                 %CleanData.MY(q) = fnval(sp_my, j);
                 CleanData.MZ(q) = fnval(sp_mz, j);
                 CleanData.V(q)  = v_avg;
-        
             end
 
             %% create summary data structure
@@ -147,6 +122,7 @@ function [CleanData, RawData, SummaryData, Figures] = SpliceData(RawData, Settin
             % evaluation vector
             eval = 1+floor(min(NewData.SA)):Settings.StepSize:ceil(max(NewData.SA))-1;
     
+            % create summary data structure
             fy_max = max(fnval(sp_fy, eval));
             fy_min = min(fnval(sp_fy, eval));
             SummaryData.MUY1(i) = fy_max(1)/fz_avg;
@@ -157,7 +133,7 @@ function [CleanData, RawData, SummaryData, Figures] = SpliceData(RawData, Settin
         end
     end
 
-    % add metadata to structure
+    % add metadata to cleaned data structure
     CleanData.source    = RawData.source;
     CleanData.testid    = RawData.testid;
     CleanData.tireid    = RawData.tireid;

@@ -1,17 +1,17 @@
-function [data, Tyre, Figures] = LoadTyreData(Round, Run, Settings)
+function [data, Tyre, Figures] = LoadTyreData(Settings)
     
     Figures = [];
 
     % create filename for database lookup table
-    filename = "database\Round" + num2str(Round) + "Database.csv";
+    filename = "database\Round" + num2str(Settings.Round) + "Database.csv";
 
     % load database table for respective round
     database = readtable(filename);
     
     % select part of filename corresponding to testing round
-    if Round == 8
+    if Settings.Round == 8
         RunCode = "B1965run";
-    elseif Round == 9
+    elseif Settings.Round == 9
         RunCode = "B2356run";
     else
         disp('Round no. invalid or not yet implemented');
@@ -22,10 +22,10 @@ function [data, Tyre, Figures] = LoadTyreData(Round, Run, Settings)
 
     
     % loop over selected runs
-    for i = 1:length(Run)
+    for i = 1:length(Settings.Run)
 
         % create filename for TTC datafile
-        filename = RunCode + num2str(Run(i)) + ".mat";
+        filename = RunCode + num2str(Settings.Run(i)) + ".mat";
 
         % load datafile
         temp = load(filename);
@@ -59,7 +59,7 @@ function [data, Tyre, Figures] = LoadTyreData(Round, Run, Settings)
     data.RL = data.RL/1e2;      % loaded radius from cm to m
 
     % create rolling resistance moment channel (cornering only)
-    if data.testid == "Cornering" && Settings.UseOldMyCalc == 1
+    if data.testid == "Cornering"
         data.MY = data.FX.*data.RL;
         data.channel.name = [data.channel.name, "MY"];
     end
@@ -85,22 +85,24 @@ function [data, Tyre, Figures] = LoadTyreData(Round, Run, Settings)
             data.D(n) = data.D(n-1) + ((data.ET(n) - data.ET(n-1))/2)*(data.V(n-1) + data.V(n));
         end
     end
+    
+    % add distance channel to names
     data.channel.name = [data.channel.name, "D"];
   
     % metadata
-    index = database.Run == Run(1);
+    index = database.Run == Settings.Run(1);
     Tyre.Brand      = string(database.Brand(index));
     Tyre.Compound   = string(database.Compound(index));
     Tyre.Dimensions = string(database.Dimensions(index));
     Tyre.Item       = string(database.Item(index));
     Tyre.DataOrigin = string(database.DataOrigin(index));
-    Tyre.Run        = string(database.Run(index));
+    %Tyre.Run        = string(database.Run(index));
     Tyre.RimWidth   = string(database.RimWidth(index));
     
     % Plot raw data
     if Settings.PlotFigs == 1
         % create string for figure title
-        figtitle1 = [data.source, ' (run ', num2str(Run), ')'];
+        figtitle1 = [data.source, ' (run ', num2str(Settings.Run), ')'];
         figtitle2 = [data.tireid, ' | ', data.testid];
 
         % 1st figure (operating conditions)
@@ -153,7 +155,7 @@ function [data, Tyre, Figures] = LoadTyreData(Round, Run, Settings)
         % 3rd figure (moments)
         Figures.RawMoments = figure("Name", "Raw data - Moments");
         sgtitle({figtitle1, figtitle2});
-        if data.testid == "Cornering" && Settings.UseOldMyCalc == 1
+        if data.testid == "Cornering"
             subplot(4,1,1); hold all; grid on;
                 plot(data.IDX, data.SA, '.', 'MarkerSize', 1); 
                 xlim([data.IDX(1) data.IDX(end)]);
@@ -170,7 +172,7 @@ function [data, Tyre, Figures] = LoadTyreData(Round, Run, Settings)
                 plot(data.IDX, data.MZ, '.', 'MarkerSize', 1); 
                 xlim([data.IDX(1) data.IDX(end)]);
                 title("MZ (Nm)");
-        elseif data.testid == "Cornering" && Settings.UseOldMyCalc == 0
+        elseif data.testid == "Cornering"
             subplot(3,1,1); hold all; grid on;
                 plot(data.IDX, data.SA, '.', 'MarkerSize', 1); 
                 xlim([data.IDX(1) data.IDX(end)]);
@@ -198,7 +200,6 @@ function [data, Tyre, Figures] = LoadTyreData(Round, Run, Settings)
                 title("MZ (Nm)");
         end
         
-
         % 4th figure (temperatures)
         Figures.RawTemps = figure("Name", "Raw data - Temperatures");
         sgtitle({figtitle1, figtitle2});
