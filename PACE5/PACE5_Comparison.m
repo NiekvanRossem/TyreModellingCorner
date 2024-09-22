@@ -62,7 +62,16 @@ function [] = PACE5_Comparison(CleanData, xData, yData, Params, Mode)
     title({CleanData.source, CleanData.tireid});
     plot3(xData(:,1), xData(:,2), yData, 'r.');
     surface(slip, FZ, out);
-    xlabel('SA (deg)'); ylabel('FZ (N)'); zlabel('FY (N)');
+    xlabel('SA (deg)'); ylabel('FZ (N)'); 
+    
+    if Mode == "FY"
+        zlabel('FY (N)');
+    elseif Mode == "MX"
+        zlabel('MX (Nm)');
+    elseif Mode == "MZ"
+        zlabel('MZ (Nm)');
+    end
+    
     box on; grid minor; view(-30, 45);
 
 end

@@ -23,6 +23,10 @@ Settings.maxIA      =  1;
 Settings.minV       = 10;
 Settings.maxV       = 13;
 
+% Limit slip angles (MZ only)
+Settings.minSA = -9;
+Settings.maxSA = 9;
+
 %% Run pre-processor
 
 [Tyre, CleanData, RawData, SummaryData, Figures] = PreProcessor(Settings);
@@ -55,7 +59,7 @@ Settings.IterSize = 50;
 Settings.eps = 1;
 
 % initial guess
-f0 = [-61.2, 10, 0.37, 0.000172, -0.0007, -4.34];
+f0 = [-100.6, 16.4, 0.37, 5.4e-5, -3.7e-4, -4.34];
 
 % fit
 [Tyre, xData, yData, Params] = PACE5_MX_Fit(CleanData, Tyre, Settings, f0);
@@ -81,28 +85,31 @@ f0 = [0.02, 0.03, 0.18, 3, -0.3, 32];
 PACE5_Comparison(CleanData, xData, yData, Params, "MZ");
 
 %% Pneumatic trail
-% 
-% % create dependent variable grid
-% FZ = linspace(0, 2500, 100); 
-% slip = linspace(-15, 15, 100);
-% [slip, FZ] = meshgrid(slip, FZ);
-% 
-% % convert to input array
-% FZ = reshape(FZ, 100*100, []);
-% slip = reshape(slip, 100*100, []);
-% X = [slip, FZ];
-% 
-% 
-% % calculate Fy
-% out1 = Pacejka5_model([Tyre.Dy1, Tyre.Dy2, Tyre.By, Tyre.Cy, Tyre.Bpy, 0], X);
-% out2 = Pacejka5_model([Tyre.Dz1, Tyre.Dz2, Tyre.Bz, Tyre.Cz, Tyre.Bpz, 0], X);
-% 
-% trail = out2./out1;
-% 
-% % reshape for plotting
-% slip = reshape(slip, 100, []);
-% FZ = reshape(FZ, 100, []);
-% trail = reshape(trail, 100, []);
-% 
-% figure; surf(slip, FZ, trail);
-% 
+
+% create dependent variable grid
+FZ = linspace(500, 2500, 100); 
+slip = linspace(-15, 15, 100);
+[slip, FZ] = meshgrid(slip, FZ);
+
+% convert to input array
+FZ = reshape(FZ, 100*100, []);
+slip = reshape(slip, 100*100, []);
+X = [slip, FZ];
+
+
+% calculate Fy
+out1 = Pacejka5_model([Tyre.Dy1, Tyre.Dy2, Tyre.By, Tyre.Cy, Tyre.Bpy, 0], X);
+out2 = Pacejka5_model([Tyre.Dz1, Tyre.Dz2, Tyre.Bz, Tyre.Cz, Tyre.Bpz, 0], X);
+
+trail = out2./out1;
+
+% reshape for plotting
+slip = reshape(slip, 100, []);
+FZ = reshape(FZ, 100, []);
+trail = reshape(trail, 100, []);
+
+figure; surf(slip, FZ, 1e3*trail); box on; grid minor;
+title('Pneumatic trail');
+xlabel('SA (deg)');
+ylabel('FZ (N)');
+zlabel('t (mm)');
