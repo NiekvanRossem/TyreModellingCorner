@@ -39,8 +39,8 @@ Settings.minV       = 10;
 Settings.maxV       = 13;
 
 % Limit slip angles (MZ only)
-Settings.minSA = -9;
-Settings.maxSA = 9;
+Settings.minSA = -10;
+Settings.maxSA =  10;
 
 % sign convention. Set to either "ISO_A", "ISO_B", or "SAE".
 Settings.Convention = "ISO_B";
@@ -74,7 +74,7 @@ f0 = [
 [Tyre, xData, yData, Params] = PACE5_FY_Fit(CleanData, Tyre, Settings, f0);
 
 % compare result
-PACE5_Comparison(CleanData, xData, yData, Params, "FY");
+PACE5_Comparison(CleanData, xData, yData, Params, "FY", Settings);
 
 %% PACE5 Overturning moment fitting
 
@@ -85,13 +85,20 @@ Settings.IterSize = 50;
 Settings.eps = 1;
 
 % initial guess
-f0 = [-100.6, 16.4, 0.37, 5.4e-5, -3.7e-4, -4.34];
+f0 = [
+    -100.6, ...     % D1
+    16.4, ...       % D2
+    0.37, ...       % B
+    5.4e-5, ...     % C
+    -3.7e-4, ...    % Bp
+    -4.34 ...       % Sv
+    ];
 
 % fit
 [Tyre, xData, yData, Params] = PACE5_MX_Fit(CleanData, Tyre, Settings, f0);
 
 % compare result
-PACE5_Comparison(CleanData, xData, yData, Params, "MX");
+PACE5_Comparison(CleanData, xData, yData, Params, "MX", Settings);
 
 %% PACE5 Self aligning moment fitting
 
@@ -108,7 +115,7 @@ f0 = [-0.02, 0.03, 0.18, 3, -0.3, 32];
 [Tyre, xData, yData, Params] = PACE5_MZ_Fit(CleanData, Tyre, Settings, f0);
 
 % compare result
-PACE5_Comparison(CleanData, xData, yData, Params, "MZ");
+PACE5_Comparison(CleanData, xData, yData, Params, "MZ", Settings);
 
 %% Pneumatic trail
 
@@ -124,8 +131,8 @@ X = [slip, FZ];
 
 
 % calculate Fy
-out1 = Pacejka5_model([Tyre.Dy1, Tyre.Dy2, Tyre.By, Tyre.Cy, Tyre.Bpy, 0], X);
-out2 = Pacejka5_model([Tyre.Dz1, Tyre.Dz2, Tyre.Bz, Tyre.Cz, Tyre.Bpz, 0], X);
+out1 = Pacejka5_model([Tyre.Dy1, Tyre.Dy2, Tyre.By, Tyre.Cy, Tyre.Bpy, 0], X, Settings);
+out2 = Pacejka5_model([Tyre.Dz1, Tyre.Dz2, Tyre.Bz, Tyre.Cz, Tyre.Bpz, 0], X, Settings);
 
 trail = out2./out1;
 

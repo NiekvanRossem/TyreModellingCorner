@@ -32,7 +32,7 @@ function [Tyre, xData, yData, Params] = PACE5_MZ_Fit(CleanData, Tyre, Settings, 
         'Display', 'off');
     
     % define function to be solved for the coefficients
-    func = @(P, X) Pacejka5_model(P, X);
+    func = @(P, X) Pacejka5_model(P, X, Settings);
     
     ParamsIter = zeros(Settings.IterSize, numel(f0));
     
