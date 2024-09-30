@@ -11,6 +11,10 @@ function MY = RollingResistance_model(P, X, RO, FZ0, V0, P0, LMY)
     % on Pacejka's implementation in MF 6.1.2 (for more information see 
     % Tire and Vehicle Dynamics by Pacejka & Besselink, equation 4.E70).
     %
+    % IMPORTANT NOTE: This model as of yet cannot be used to find the
+    % rolling resistance from TTC data, as the Fx signal in free rolling
+    % also includes the bearing friction of the machine itself.
+    %
     % INPUTS
     % ======
     % P: 8x1 matrix

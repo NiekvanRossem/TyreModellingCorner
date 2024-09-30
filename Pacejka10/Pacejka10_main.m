@@ -1,8 +1,12 @@
 %%-----------------------------------------------------------------------%%
-% filename:         PACE5_main.m
+% filename:         Pacejka10_main.m
 % author(s):        Niek van Rossem
-% Creation date:    22-09-2024
+% Creation date:    30-09-2024
 %%-----------------------------------------------------------------------%%
+
+%% Documentation
+% -
+%
 
 %% Prepare workspace
 
@@ -18,10 +22,10 @@ set(0,'DefaultFigureWindowStyle','docked');
 Settings = Settings();
 
 % add units used to settings structure
-Settings.AngleUnit  = "deg";
-Settings.ForceUnit  = "N";
+Settings.AngleUnit = "deg";
+Settings.ForceUnit = "N";
 Settings.LengthUnit = "m";
-Settings.PressUnit  = "bar";
+Settings.PressUnit = "bar";
 
 % turn raw data plots on
 Settings.PlotFigs = 1;
@@ -49,10 +53,10 @@ Settings.Convention = "ISO_B";
 
 [Tyre, CleanData, RawData, SummaryData, Figures] = PreProcessor(Settings);
 
-Tyre.Model = "PACE5";
+Tyre.Model = "Pacejka10";
 Tyre.Convention = Settings.Convention;
 
-%% PACE5 Side force fitting
+%% Pacejka10 Side force fitting
 
 % set number of iterations
 Settings.IterSize = 10;
@@ -62,19 +66,26 @@ Settings.eps = 1e-2;
 
 % initial guess
 f0 = [
-    -2.557, ...     % D1
-    -0.1332, ...    % D2
-     0.18, ...      % B
-     1.78, ...      % C
-    -0.4893, ...    % Bp
-    14.2 ...        % Sv
+     0.1, ...   % C
+     1.0, ...   % D1
+    -0.1, ...   % D2
+     0.1, ...   % E
+     0.1, ...   % P
+     0.0  ...   % SH1
+     0.0  ...   % SH2
+     0.0  ...   % Sv
     ];
 
+% set nominal load
+Fz0 = 600;
+
 % fit
-[Tyre, xData, yData, Params] = PACE5_FY_Fit(CleanData, Tyre, Settings, f0);
+[Tyre, xData, yData, Params] = Pacejka10_FY_Fit(CleanData, Tyre, Settings, f0, Fz0);
 
 % compare result
-PACE5_Comparison(CleanData, xData, yData, Params, "FY");
+Pacejka10_Comparison(CleanData, xData, yData, Params, "FY");
+
+%% ENDED HERE
 
 %% PACE5 Overturning moment fitting
 

@@ -1,3 +1,9 @@
+%%-----------------------------------------------------------------------%%
+% filename:         PreProcessor.m
+% author(s):        Niek van Rossem
+% Creation date:    22-09-2024
+%%-----------------------------------------------------------------------%%
+
 function [Tyre, CleanData, RawData, SummaryData, Figures] = PreProcessor(Settings)
 
     % load data

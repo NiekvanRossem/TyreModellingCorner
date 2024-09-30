@@ -1,3 +1,9 @@
+%%-----------------------------------------------------------------------%%
+% filename:         LoadTyreData.m
+% author(s):        Niek van Rossem
+% Creation date:    17-09-2024
+%%-----------------------------------------------------------------------%%
+
 function [data, Tyre, Figures] = LoadTyreData(Settings)
     
     Figures = [];
@@ -47,22 +53,24 @@ function [data, Tyre, Figures] = LoadTyreData(Settings)
         end
     end
     
-    % invert loads for proper SAE axis system
-    data.FZ = -data.FZ;
-    data.FY = -data.FY;
-    
+    % invert certain channels for selected convention
+    if Settings.Convention == "ISO_A"
+        data.SA = -data.SA;
+        data.FY = -data.FY;
+        data.FZ = -data.FZ;
+        data.MZ = -data.MZ;
+    elseif Settings.Convention == "ISO_B"        
+        data.FY = -data.FY;
+        data.FZ = -data.FZ;
+        data.MZ = -data.MZ;
+    end
+
     % perform unit conversions
     data.P  = data.P/1e2;       % pressure from kPa to bar
     data.V  = data.V/3.6;       % velocity from kph to m/s
     data.N  = data.N*2*pi/60;   % angular velocity from rpm to rad/s
     data.RE = data.RE/1e2;      % effective radius from cm to m
     data.RL = data.RL/1e2;      % loaded radius from cm to m
-
-    % create rolling resistance moment channel (cornering only)
-    if data.testid == "Cornering"
-        data.MY = data.FX.*data.RL;
-        data.channel.name = [data.channel.name, "MY"];
-    end
 
     % create index channel
     data.IDX = linspace(1, length(data.SA), length(data.SA))';
@@ -96,7 +104,6 @@ function [data, Tyre, Figures] = LoadTyreData(Settings)
     Tyre.Dimensions = string(database.Dimensions(index));
     Tyre.Item       = string(database.Item(index));
     Tyre.DataOrigin = string(database.DataOrigin(index));
-    %Tyre.Run        = string(database.Run(index));
     Tyre.RimWidth   = string(database.RimWidth(index));
     
     % Plot raw data
@@ -156,23 +163,6 @@ function [data, Tyre, Figures] = LoadTyreData(Settings)
         Figures.RawMoments = figure("Name", "Raw data - Moments");
         sgtitle({figtitle1, figtitle2});
         if data.testid == "Cornering"
-            subplot(4,1,1); hold all; grid on;
-                plot(data.IDX, data.SA, '.', 'MarkerSize', 1); 
-                xlim([data.IDX(1) data.IDX(end)]);
-                title("SA (deg)");
-            subplot(4,1,2); hold all; grid on;
-                plot(data.IDX, data.MX, '.', 'MarkerSize', 1); 
-                xlim([data.IDX(1) data.IDX(end)]);
-                title("MX (Nm)");
-            subplot(4,1,3); hold all; grid on;
-                plot(data.IDX, data.MY, '.', 'MarkerSize', 1); 
-                xlim([data.IDX(1) data.IDX(end)]);
-                title("MY (Nm)");                
-            subplot(4,1,4); hold all; grid on;
-                plot(data.IDX, data.MZ, '.', 'MarkerSize', 1); 
-                xlim([data.IDX(1) data.IDX(end)]);
-                title("MZ (Nm)");
-        elseif data.testid == "Cornering"
             subplot(3,1,1); hold all; grid on;
                 plot(data.IDX, data.SA, '.', 'MarkerSize', 1); 
                 xlim([data.IDX(1) data.IDX(end)]);
@@ -185,7 +175,7 @@ function [data, Tyre, Figures] = LoadTyreData(Settings)
                 plot(data.IDX, data.MZ, '.', 'MarkerSize', 1); 
                 xlim([data.IDX(1) data.IDX(end)]);
                 title("MZ (Nm)");
-        else
+        elseif data.testid == "Drive/Brake/Combined"
             subplot(3,1,1); hold all; grid on;
                 plot(data.IDX, data.SL, '.', 'MarkerSize', 1); 
                 xlim([data.IDX(1) data.IDX(end)]);
@@ -198,6 +188,8 @@ function [data, Tyre, Figures] = LoadTyreData(Settings)
                 plot(data.IDX, data.MZ, '.', 'MarkerSize', 1); 
                 xlim([data.IDX(1) data.IDX(end)]);
                 title("MZ (Nm)");
+        else
+            disp("Data processing for this type of run is not yet implemented.");
         end
         
         % 4th figure (temperatures)
@@ -208,11 +200,13 @@ function [data, Tyre, Figures] = LoadTyreData(Settings)
                 plot(data.IDX, data.SA, '.', 'MarkerSize', 1); 
                 xlim([data.IDX(1) data.IDX(end)]);
                 title("SA (deg)");
-        else
+        elseif data.testid == "Drive/Brake/Combined"
             subplot(6,1,1); hold all; grid on;
                 plot(data.IDX, data.SL, '.', 'MarkerSize', 1); 
                 xlim([data.IDX(1) data.IDX(end)]);
                 title("SL");
+        else
+            disp("Data processing for this type of run is not yet implemented.");
         end
         subplot(6,1,2); hold all; grid on;
             plot(data.IDX, data.AMBTMP, '.', 'MarkerSize', 1); 
@@ -243,11 +237,13 @@ function [data, Tyre, Figures] = LoadTyreData(Settings)
                 plot(data.IDX, data.SA, '.', 'MarkerSize', 1); 
                 xlim([data.IDX(1) data.IDX(end)]);
                 title("SA (deg)");
-        else
+        elseif data.testid == "Drive/Brake/Combined"
             subplot(5,1,1); hold all; grid on;
                 plot(data.IDX, data.SL, '.', 'MarkerSize', 1); 
                 xlim([data.IDX(1) data.IDX(end)]);
                 title("SL");
+        else
+            disp("Data processing for this type of run is not yet implemented.");
         end
         subplot(5,1,2); hold all; grid on;
             plot(data.IDX, data.N, '.', 'MarkerSize', 1); 

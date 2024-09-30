@@ -1,3 +1,9 @@
+%%-----------------------------------------------------------------------%%
+% filename:         PACE5_MZ_Fit.m
+% author(s):        Niek van Rossem
+% Creation date:    23-09-2024
+%%-----------------------------------------------------------------------%%
+
 function [Tyre, xData, yData, Params] = PACE5_MZ_Fit(CleanData, Tyre, Settings, f0)
 
     h = figure('Name', 'Parameter convergence');

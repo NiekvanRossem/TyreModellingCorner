@@ -1,10 +1,10 @@
 %%-----------------------------------------------------------------------%%
-% filename:         PACE5_FY_Fit.m
+% filename:         Pacejka10_FY_Fit.m
 % author(s):        Niek van Rossem
-% Creation date:    22-09-2024
+% Creation date:    30-09-2024
 %%-----------------------------------------------------------------------%%
 
-function [Tyre, xData, yData, Params] = PACE5_FY_Fit(CleanData, Tyre, Settings, f0)
+function [Tyre, xData, yData, Params] = Pacejka10_FY_Fit(CleanData, Tyre, Settings, f0, Fz0)
 
     h = figure('Name', 'Parameter convergence');
 
@@ -36,12 +36,12 @@ function [Tyre, xData, yData, Params] = PACE5_FY_Fit(CleanData, Tyre, Settings, 
         'Display', 'off');
     
     % define function to be solved for the coefficients
-    func = @(P, X) Pacejka5_model(P, X, Settings);
+    func = @(P, X) Pacejka10_model(P, X, Fz0, 1, Settings);
     
     ParamsIter = zeros(Settings.IterSize, numel(f0));
     
     % create array with titles for figure
-    TitleNames = ["D1"; "D2"; "B"; "C"; "Bp"; "Sv"];
+    TitleNames = ["C"; "D1"; "D2"; "E"; "P"; "S_H1"; "S_H2"; "S_V"];
     
     % Bootstrapping technique
     for k = 1:Settings.IterSize
@@ -61,7 +61,7 @@ function [Tyre, xData, yData, Params] = PACE5_FY_Fit(CleanData, Tyre, Settings, 
         % plot parameter changes
         for n = 1:numel(Params)
             figure(h);
-            subplot(2,3,n);
+            subplot(2,4,n);
             bar([ParamsIter(:,n)], 'group');
             title(TitleNames(n));
             xlim([0 Settings.IterSize]);
@@ -87,28 +87,32 @@ function [Tyre, xData, yData, Params] = PACE5_FY_Fit(CleanData, Tyre, Settings, 
         end
     
         % update figure name
-        set(figure(h), 'Name', [' PACE5 Free rolling lateral force - Iteration: ', num2str(k), ...
+        set(figure(h), 'Name', [' Pacejka10 Free rolling lateral force - Iteration: ', num2str(k), ...
             ' | RMS ERROR: ', num2str(sqrt(resnorm(k))), ' N']);
     end
         
+    % find the best iteration (should be the last)
     idx = find(resnorm == min(resnorm));
 
     % extract best fit parameters
     Params = ParamsIter(idx(1),:);
     
     % Add parameters to Tyre structure
-    Tyre.Dy1 = Params(1);
-    Tyre.Dy2 = Params(2);
-    Tyre.By  = Params(3);
-    Tyre.Cy  = Params(4);
-    Tyre.Bpy = Params(5);
-    
-    % only if Svy was included in the fitting process
-    try
-        Tyre.Svy = Params(6);
-    end
+    Tyre.Cy     = Params(1);
+    Tyre.Dy1    = Params(2);
+    Tyre.Dy2    = Params(2);
+    Tyre.Ey     = Params(3);
+    Tyre.Py     = Params(4);
+    Tyre.S_Hy1  = Params(5);
+    Tyre.S_Hy2  = Params(5);
+    Tyre.S_vy   = Params(5);
     
     % add resnorm as well
     Tyre.Resnorm_FY = sqrt(min(resnorm));
+
+    % add predefined parameters
+    Tyre.Fz0 = Fz0;
+    Tyre.lambda = 1;
+
 end
 

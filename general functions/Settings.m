@@ -1,3 +1,9 @@
+%%-----------------------------------------------------------------------%%
+% filename:         Settings.m
+% author(s):        Niek van Rossem
+% Creation date:    22-09-2024
+%%-----------------------------------------------------------------------%%
+
 function Settings = Settings()
 
     % set to 1 if you want to plot raw data
