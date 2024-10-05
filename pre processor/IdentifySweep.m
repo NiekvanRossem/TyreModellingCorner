@@ -28,8 +28,14 @@ function [z_new, Figures] = IdentifySweep(data, Figures, Settings)
             end
         end
 
+    if Settings.PlotFigs == 1
+        figure(Figures.RawCond);
+        subplot(4,1,1);
+        plot(z_new, zeros(length(z_new,1)), 'r*');
+    end
+
     % drive/brake/combined data
-    elseif data.testid == "Drive/Brake/Combined"
+    elseif data.testid == "Drive/Brake/Combined1"
 
         % fit spline to FZ channel
         sp = spline(data.IDX, data.FZ);
@@ -63,16 +69,47 @@ function [z_new, Figures] = IdentifySweep(data, Figures, Settings)
         end
 
         z_new = [z_new, data.IDX(end)];
+
+        if Settings.PlotFigs == 1
+            figure(Figures.RawCond);
+            subplot(4,1,2);
+            plot(z_new, zeros(length(z_new),1), 'r*');
+        end
+
+    elseif data.testid == "Drive/Brake/Combined"
+
+        % fit spline to slip angle channel
+        sp = csaps(data.IDX, data.SL, 1-1e-5);
+
+        % find zero crossings
+        zeros = fnzeros(sp);
+        zeros = round(zeros(1,:));
+        zeros = [data.IDX(1), zeros, data.IDX(end)];
+
+        z_new = [];
+
+        % there should be a single peak between two zero crossings
+        for i = 1:length(zeros)-1
+
+            temp = data.SL(zeros(i):zeros(i+1));
+            
+            % find peak and its location
+            [~, loc] = max(abs(temp));
+
+            temp2 = loc + data.IDX(zeros(i)) - 1;
+
+            if temp(loc) > 0.1
+                z_new = [z_new, temp2];
+            end
+        end
+
+        if Settings.PlotFigs == 1
+            figure(Figures.RawCond);
+            subplot(4,1,2);
+            xline(z_new, 'r-', 'LineWidth', 0.5);
+        end
     else
         disp("Data processing for this type not yet implemented.");
     end
-    
-    % add to plot
-    if Settings.PlotFigs == 1
-        figure(Figures.RawCond);
-        subplot(4,1,1);
-        xline(z_new, 'r-', 'LineWidth', 0.5);
-    end
-
 end
 

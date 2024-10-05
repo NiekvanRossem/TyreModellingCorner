@@ -4,7 +4,7 @@
 % Creation date:    22-09-2024
 %%-----------------------------------------------------------------------%%
 
-function [] = PACE5_Comparison(CleanData, xData, yData, Params, Mode, Settings)
+function [] = PACE5_Comparison(CleanData, xData, yData, Params, Mode, Tyre, Settings)
     %% Documentation
     % This function compares a fit of the PACE5 tyre model to the cleaned
     % up original data. It creates 2 figures: the first one plots the
@@ -54,9 +54,13 @@ function [] = PACE5_Comparison(CleanData, xData, yData, Params, Mode, Settings)
     % find vertical loads
     verticalLoad = unique(xData(:,2));
         
+    figtitle1 = CleanData.source;
+    figtitle2 = CleanData.tireid;
+    figtitle3 = char(' | ' + Mode + ' Fit (' + Tyre.Model + ') | Camber = ' + num2str(round(Tyre.Camber, 1)) + ' deg | Pressure = ' + num2str(round(Tyre.Pressure, 2)) + ' bar');
+
     % set figure formatting
     figure('Name', 'Curve comparison'); hold all;
-    title({CleanData.source, CleanData.tireid});
+    title({figtitle1, [figtitle2, figtitle3]});
     box on; grid minor;
     if Mode == "FY"
         xlabel('SA (deg)');
@@ -68,8 +72,18 @@ function [] = PACE5_Comparison(CleanData, xData, yData, Params, Mode, Settings)
     elseif Mode == "MZ"
         xlabel('SA (deg)');
         ylabel('MZ (Nm)');
+    elseif Mode == "FX"
+        xlabel('SL');
+        ylabel('FX (N)');
     end
-    slip = linspace(-15, 15, 100)';
+
+    % create slip angle/ratio array
+    if CleanData.testid == "Cornering"
+        slip = linspace(-15, 15, 100)';
+    elseif CleanData.testid == "Drive/Brake/Combined"
+        slip = linspace(-0.25, 0.25, 100)';
+    end
+
     xline(0, 'k'); yline(0, 'k');
     
     % loop over all vertical loads
@@ -90,7 +104,7 @@ function [] = PACE5_Comparison(CleanData, xData, yData, Params, Mode, Settings)
     
     % create dependent variable grid
     FZ = linspace(0, 2500, 100); 
-    slip = linspace(-15, 15, 100);
+    % slip = linspace(-15, 15, 100);
     [slip, FZ] = meshgrid(slip, FZ);
      
     % convert to input array
@@ -108,7 +122,7 @@ function [] = PACE5_Comparison(CleanData, xData, yData, Params, Mode, Settings)
     
     % plot results
     figure('Name', 'Surface plot comparison'); clf; hold all;
-    title({CleanData.source, CleanData.tireid});
+    title({figtitle1, [figtitle2, figtitle3]});
     plot3(xData(:,1), xData(:,2), yData, 'ro');
     surface(slip, FZ, out);
     xlabel('SA (deg)'); ylabel('FZ (N)'); 
@@ -120,6 +134,8 @@ function [] = PACE5_Comparison(CleanData, xData, yData, Params, Mode, Settings)
         zlabel('MX (Nm)');
     elseif Mode == "MZ"
         zlabel('MZ (Nm)');
+    elseif Mode == "FX"
+        zlabel("FX (N)");
     end
     
     box on; grid minor; view(-30, 45);

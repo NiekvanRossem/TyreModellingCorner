@@ -28,7 +28,7 @@ Settings.PlotFigs = 1;
 
 % Choose round and run
 Settings.Round = 9;
-Settings.Run = [20, 21];
+Settings.Run = [63, 64];
 
 % Select limits for camber and pressure
 Settings.minPress   = 0.78;
@@ -52,97 +52,127 @@ Settings.Convention = "ISO_B";
 Tyre.Model = "PACE5";
 Tyre.Convention = Settings.Convention;
 
+%% PACE5 longitudinal force fitting
+
+if RawData.testid == "Drive/Brake/Combined"
+
+    % set number of iterations
+    Settings.IterSize = 10;
+    
+    % set mutation parameter
+    Settings.eps = 1e-2;
+    
+    % initial guess
+    f0 = [
+         2.4, ...   % D1
+        -0.08, ...  % D2
+         10.5, ...  % B
+         2.0, ...   % C
+        -0.2, ...   % Bp
+         0.8 ...    % Sv
+        ];
+    
+    % fit
+    [Tyre, xData, yData, Params] = PACE5_FX_Fit(CleanData, Tyre, Settings, f0);
+    
+    % compare result
+    PACE5_Comparison(CleanData, xData, yData, Params, "FX", Tyre, Settings);
+end
+
 %% PACE5 Side force fitting
 
-% set number of iterations
-Settings.IterSize = 10;
-
-% set mutation parameter
-Settings.eps = 1e-2;
-
-% initial guess
-f0 = [
-    -2.557, ...     % D1
-    -0.1332, ...    % D2
-     0.18, ...      % B
-     1.78, ...      % C
-    -0.4893, ...    % Bp
-    14.2 ...        % Sv
-    ];
-
-% fit
-[Tyre, xData, yData, Params] = PACE5_FY_Fit(CleanData, Tyre, Settings, f0);
-
-% compare result
-PACE5_Comparison(CleanData, xData, yData, Params, "FY", Settings);
-
-%% PACE5 Overturning moment fitting
-
-% set number of iterations
-Settings.IterSize = 50;
-
-% set mutation parameter
-Settings.eps = 1;
-
-% initial guess
-f0 = [
-    -100.6, ...     % D1
-    16.4, ...       % D2
-    0.37, ...       % B
-    5.4e-5, ...     % C
-    -3.7e-4, ...    % Bp
-    -4.34 ...       % Sv
-    ];
-
-% fit
-[Tyre, xData, yData, Params] = PACE5_MX_Fit(CleanData, Tyre, Settings, f0);
-
-% compare result
-PACE5_Comparison(CleanData, xData, yData, Params, "MX", Settings);
-
-%% PACE5 Self aligning moment fitting
-
-% set number of iterations
-Settings.IterSize = 5;
-
-% set mutation parameter
-Settings.eps = 1e-2;
-
-% initial guess
-f0 = [-0.02, 0.03, 0.18, 3, -0.3, 32];
-
-% fit
-[Tyre, xData, yData, Params] = PACE5_MZ_Fit(CleanData, Tyre, Settings, f0);
-
-% compare result
-PACE5_Comparison(CleanData, xData, yData, Params, "MZ", Settings);
-
-%% Pneumatic trail
-
-% create dependent variable grid
-FZ = linspace(500, 2500, 100); 
-slip = linspace(-15, 15, 100);
-[slip, FZ] = meshgrid(slip, FZ);
-
-% convert to input array
-FZ = reshape(FZ, 100*100, []);
-slip = reshape(slip, 100*100, []);
-X = [slip, FZ];
-
-
-% calculate Fy
-out1 = Pacejka5_model([Tyre.Dy1, Tyre.Dy2, Tyre.By, Tyre.Cy, Tyre.Bpy, 0], X, Settings);
-out2 = Pacejka5_model([Tyre.Dz1, Tyre.Dz2, Tyre.Bz, Tyre.Cz, Tyre.Bpz, 0], X, Settings);
-
-trail = out2./out1;
-
-% reshape for plotting
-slip = reshape(slip, 100, []);
-FZ = reshape(FZ, 100, []);
-trail = reshape(trail, 100, []);
-
-figure; surf(slip, FZ, 1e3*trail); box on; grid minor;
-title('Pneumatic trail');
-xlabel('SA (deg)');
-ylabel('FZ (N)');
-zlabel('t (mm)');
+if RawData.testid == "Cornering"
+    
+    % set number of iterations
+    Settings.IterSize = 10;
+    
+    % set mutation parameter
+    Settings.eps = 1e-2;
+    
+    % initial guess
+    f0 = [
+        -2.557, ...     % D1
+        -0.1332, ...    % D2
+         0.18, ...      % B
+         1.78, ...      % C
+        -0.4893, ...    % Bp
+        14.2 ...        % Sv
+        ];
+    
+    % fit
+    [Tyre, xData, yData, Params] = PACE5_FY_Fit(CleanData, Tyre, Settings, f0);
+    
+    % compare result
+    PACE5_Comparison(CleanData, xData, yData, Params, "FY", Tyre, Settings);
+    
+    %% PACE5 Overturning moment fitting
+    
+    % set number of iterations
+    Settings.IterSize = 50;
+    
+    % set mutation parameter
+    Settings.eps = 1;
+    
+    % initial guess
+    f0 = [
+        -100.6, ...     % D1
+        16.4, ...       % D2
+        0.37, ...       % B
+        5.4e-5, ...     % C
+        -3.7e-2, ...    % Bp
+        -4.34 ...       % Sv
+        ];
+    
+    % fit
+    [Tyre, xData, yData, Params] = PACE5_MX_Fit(CleanData, Tyre, Settings, f0);
+    
+    % compare result
+    PACE5_Comparison(CleanData, xData, yData, Params, "MX", Tyre, Settings);
+    
+    %% PACE5 Self aligning moment fitting
+    
+    % set number of iterations
+    Settings.IterSize = 5;
+    
+    % set mutation parameter
+    Settings.eps = 1e-2;
+    
+    % initial guess
+    f0 = [-0.02, 0.03, 0.18, 3, -0.3, 32];
+    
+    % fit
+    [Tyre, xData, yData, Params] = PACE5_MZ_Fit(CleanData, Tyre, Settings, f0);
+    
+    % compare result
+    PACE5_Comparison(CleanData, xData, yData, Params, "MZ", Tyre, Settings);
+    
+    %% Pneumatic trail
+    
+    % create dependent variable grid
+    FZ = linspace(500, 2500, 100); 
+    slip = linspace(-15, 15, 100);
+    [slip, FZ] = meshgrid(slip, FZ);
+    
+    % convert to input array
+    FZ = reshape(FZ, 100*100, []);
+    slip = reshape(slip, 100*100, []);
+    X = [slip, FZ];
+    
+    
+    % calculate Fy
+    out1 = Pacejka5_model([Tyre.Dy1, Tyre.Dy2, Tyre.By, Tyre.Cy, Tyre.Bpy, 0], X, Settings);
+    out2 = Pacejka5_model([Tyre.Dz1, Tyre.Dz2, Tyre.Bz, Tyre.Cz, Tyre.Bpz, 0], X, Settings);
+    
+    trail = out2./out1;
+    
+    % reshape for plotting
+    slip = reshape(slip, 100, []);
+    FZ = reshape(FZ, 100, []);
+    trail = reshape(trail, 100, []);
+    
+    figure; surf(slip, FZ, 1e3*trail); box on; grid minor;
+    title('Pneumatic trail');
+    xlabel('SA (deg)');
+    ylabel('FZ (N)');
+    zlabel('t (mm)');
+end

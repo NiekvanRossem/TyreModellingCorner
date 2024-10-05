@@ -13,7 +13,8 @@ function Settings = Settings()
     Settings.StepSize = 1;
 
     % smoothing factor for spline fit
-    Settings.Smoothing = 0.1;
+    Settings.LatSmoothing = 0.1;
+    Settings.LongSmoothing = 0.9999;
 
     % select round and run
     Settings.Round = 9;
