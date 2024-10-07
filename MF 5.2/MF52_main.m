@@ -1,7 +1,7 @@
 %%-----------------------------------------------------------------------%%
-% filename:         Pacejka10_main.m
+% filename:         MF52_main.m
 % author(s):        Niek van Rossem
-% Creation date:    30-09-2024
+% Creation date:    08-10-2024
 %%-----------------------------------------------------------------------%%
 
 %% Documentation
@@ -21,7 +21,7 @@ set(0,'DefaultFigureWindowStyle','docked');
 % Import settings
 Settings = Settings();
 
-Settings.StepSize = 0.5;
+Settings.StepSize = 0.1;
 
 % add units used to settings structure
 Settings.AngleUnit = "deg";
@@ -40,7 +40,7 @@ Settings.Run = [8, 9];
 Settings.minPress   = 0.78;
 Settings.maxPress   = 0.88;
 Settings.minIA      = -1;
-Settings.maxIA      =  1;
+Settings.maxIA      =  5;
 Settings.minV       = 10;
 Settings.maxV       = 13;
 
@@ -64,28 +64,19 @@ Tyre.Convention = Settings.Convention;
 Settings.IterSize = 50;
 
 % set mutation parameter
-Settings.eps = 1e-1;
+Settings.eps = 1;
 
 % initial guess
-f0 = [
-     1.48, ...	
-     2.48, ...	
-    -0.17, ...
-     4.00, ...
-     0.0011, ...	
-    -0.104, ...
-     0.024, ...
-    25.3 ...
-    ];
+f0 = [1.5, 2.5, -0.2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 % set nominal load
 Fz0 = 600;
 
 % fit
-[Tyre, xData, yData, Params] = Pacejka10_FY_Fit(CleanData, Tyre, Settings, f0, Fz0);
+[Tyre, xData, yData, Params] = MF52_FY_Fit(CleanData, Tyre, Settings, f0, Fz0);
 
 % compare result
-Pacejka10_Comparison(CleanData, xData, yData, Params, "FY", 600, Settings);
+MF52_Comparison(CleanData, xData, yData, Params, "FY", 600, Settings);
 
 %% Pacejka10 Overturning moment fitting
 

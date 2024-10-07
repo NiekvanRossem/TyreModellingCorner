@@ -21,28 +21,7 @@ function [CleanData, RawData, SummaryData, Figures] = SpliceData(RawData, Settin
         end
 
         %% Cornering data analysis
-        % ambtmp    % done
-        % et        % not needed
-        % fx        % done
-        % fy        % done
-        % fz        % done
-        % ia        % done
-        % mx        % done
-        % mz        % done
-        % n         % done
-        % p         % done
-        % re        % not needed
-        % rl        % done
-        % rst       % done
-        % SA        % done
-        % sl        % done
-        % tstc      % not needed
-        % tsti      % not needed
-        % tsto      % not needed
-        % v         % done
-        % d         % not needed
-        
-        % post processing for cornering
+     
         if RawData.testid == "Cornering" && max(NewData.SA) > 1  % filter out sweeps where nothing happens
 
             % calculate average of variables held constant
@@ -54,15 +33,6 @@ function [CleanData, RawData, SummaryData, Figures] = SpliceData(RawData, Settin
             sl_avg = round(mean(NewData.SL),0);                             % slip ratio
             v_avg  = round(mean(NewData.V),1);                              % velocity
             
-            % clean up channels that were supposed to be constant
-            RawData.AMBTMP(z(i):z(i+1)) = ambtmp_avg;                       % inclination angle
-            RawData.IA(z(i):z(i+1)) = ia_avg;                               % inclination angle
-            RawData.FZ(z(i):z(i+1)) = fz_avg;                               % vertical load
-            RawData.N(z(i):z(i+1))  = n_avg;                                % angular speed
-            RawData.P(z(i):z(i+1))  = p_avg;                                % pressure
-            RawData.SL(z(i):z(i+1)) = sl_avg;                               % slip ratio
-            RawData.V(z(i):z(i+1))  = v_avg;                                % velocity
-
             % fit a smoothed spline to the channels that vary
             sp_fx   = csaps(NewData.SA, NewData.FX, Settings.LatSmoothing);
             sp_fy   = csaps(NewData.SA, NewData.FY, Settings.LatSmoothing);
@@ -81,17 +51,17 @@ function [CleanData, RawData, SummaryData, Figures] = SpliceData(RawData, Settin
                 
                 Figures.CleanDataCond = figure('Name', 'Data cleaning - test segment');
                 sgtitle({figtitle1, figtitle2});
-                subplot(1,3,1); hold on; grid on;
+                subplot(1,3,1); hold all; grid on;
                     plot(NewData.SA, NewData.FY, 'b.');
                     fnplt(sp_fy, 'r-');
                     xlabel('SA (deg)');
                     ylabel('FY (N)');
-                subplot(1,3,2); hold on; grid on;
+                subplot(1,3,2); hold all; grid on;
                     plot(NewData.SA, NewData.MX, 'b.');
                     fnplt(sp_mx, 'r-');
                     xlabel('SA (deg)');
                     ylabel('MX (Nm)');
-                subplot(1,3,3); hold on; grid on;
+                subplot(1,3,3); hold all; grid on;
                     plot(NewData.SA, NewData.MZ, 'b.');
                     fnplt(sp_mz, 'r-');
                     xlabel('SA (deg)');
@@ -159,15 +129,6 @@ function [CleanData, RawData, SummaryData, Figures] = SpliceData(RawData, Settin
                 NewData.(fn{j}) = NewData.(fn{j})(idx);
             end
 
-            % clean up channels that were supposed to be constant
-            %RawData.AMBTMP(z(i):z(i+1)) = ambtmp_avg;                       % inclination angle
-            %RawData.IA(z(i):z(i+1)) = ia_avg;                               % inclination angle
-            %RawData.FZ(z(i):z(i+1)) = fz_avg;                               % vertical load
-            %RawData.N(z(i):z(i+1))  = n_avg;                                % angular speed
-            %RawData.P(z(i):z(i+1))  = p_avg;                                % pressure
-            %RawData.SA(z(i):z(i+1)) = sa_avg;                               % slip angle
-            %RawData.V(z(i):z(i+1))  = v_avg;                                % velocity
-
             % fit a smoothed spline to the channels that vary
             sp_fx   = csaps(NewData.SL, NewData.FX, Settings.LongSmoothing);
             sp_fy   = csaps(NewData.SL, NewData.FY, Settings.LongSmoothing);
@@ -184,7 +145,7 @@ function [CleanData, RawData, SummaryData, Figures] = SpliceData(RawData, Settin
                 figtitle1 = [RawData.source, ' (run ', num2str(RawData.RUN(1)), ')'];
                 figtitle2 = [RawData.tireid, ' | ', RawData.testid, ' | Camber = ', num2str(ia_avg), ' deg | pressure = ', num2str(p_avg), ' bar | Fz = ', num2str(fz_avg), ' N'];
                 
-                figure('Name', 'Data cleaning - test segment');
+                figure('Name', 'Data cleaning - test segment'); hold all;
                 sgtitle({figtitle1, figtitle2});
                 plot(NewData.SL, NewData.FX, 'b.');
                 fnplt(sp_fx, 'r-');
@@ -219,7 +180,7 @@ function [CleanData, RawData, SummaryData, Figures] = SpliceData(RawData, Settin
             if sa_avg > -0.5 && sa_avg < 0.5
                 
                 % evaluation vector
-                eval = 0.01*floor(100*min(NewData.SL)):0.01*Settings.StepSize:0.01*ceil(100*max(NewData.SL));
+                eval = 0.01*floor(100*min(NewData.SL)):0.005*Settings.StepSize:0.01*ceil(100*max(NewData.SL));
         
                 % find min and max side force
                 fx_max = max(fnval(sp_fx, eval));
@@ -245,5 +206,6 @@ function [CleanData, RawData, SummaryData, Figures] = SpliceData(RawData, Settin
     % display dataset reduction
     reduction = numel(CleanData.IDX)/numel(RawData.IDX)*100;
     disp(['Reduced dataset to ', num2str(round(reduction, 1)), '% of its original size!']);
+
 end
 

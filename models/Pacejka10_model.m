@@ -4,7 +4,7 @@
 % Creation date:    30-09-2024
 %%-----------------------------------------------------------------------%%
 
-function out = Pacejka10_model(P, X, Fz0, lambda, Settings)
+function out = Pacejka10_model(Par, X, Fz0, lambda, Settings)
     %% Documentation
     % This function calculates the Fx, Fy, Mx, or Mz based on the Pacejka10
     % model. This model works for all
@@ -44,14 +44,14 @@ function out = Pacejka10_model(P, X, Fz0, lambda, Settings)
     %% Extract parameters from array
 
     % coefficients
-    C       = P(1);
-    D1      = P(2);
-    D2      = P(3);
-    E       = P(4);
-    P       = P(5);
-    S_H1    = P(6);
-    S_H2    = P(7);
-    S_V     = P(8);
+    C       = Par(1);
+    D1      = Par(2);
+    D2      = Par(3);
+    E       = Par(4);
+    P       = Par(5);
+    S_H1    = Par(6);
+    S_H2    = Par(7);
+    S_V     = Par(8);
 
     % input state
     S   = X(:,1);

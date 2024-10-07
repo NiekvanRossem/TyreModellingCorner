@@ -4,7 +4,7 @@
 % Creation date:    30-09-2024
 %%-----------------------------------------------------------------------%%
 
-function [Tyre, xData, yData, Params] = Pacejka10_FY_Fit(CleanData, Tyre, Settings, f0, Fz0)
+function [Tyre, xData, yData, Params] = Pacejka10_MX_Fit(CleanData, Tyre, Settings, f0, Fz0)
 
     h = figure('Name', 'Parameter convergence');
 
@@ -27,7 +27,7 @@ function [Tyre, xData, yData, Params] = Pacejka10_FY_Fit(CleanData, Tyre, Settin
     xData = horzcat(CleanData.SA(idx)', CleanData.FZ(idx)');
     
     % create output data array
-    yData = CleanData.FY(idx)';
+    yData = CleanData.MX(idx)';
     
     % set solver options
     options = optimset( ...
@@ -87,8 +87,8 @@ function [Tyre, xData, yData, Params] = Pacejka10_FY_Fit(CleanData, Tyre, Settin
         end
     
         % update figure name
-        set(figure(h), 'Name', [' Pacejka10 Free rolling lateral force - Iteration: ', num2str(k), ...
-            ' | RMS ERROR: ', num2str(sqrt(resnorm(k))), ' N']);
+        set(figure(h), 'Name', [' Pacejka10 Free rolling overturning moment - Iteration: ', num2str(k), ...
+            ' | RMS ERROR: ', num2str(sqrt(resnorm(k))), ' Nm']);
     end
         
     % find the best iteration (should be the last)
@@ -98,17 +98,17 @@ function [Tyre, xData, yData, Params] = Pacejka10_FY_Fit(CleanData, Tyre, Settin
     Params = ParamsIter(idx(1),:);
     
     % Add parameters to Tyre structure
-    Tyre.Cy     = Params(1);
-    Tyre.Dy1    = Params(2);
-    Tyre.Dy2    = Params(3);
-    Tyre.Ey     = Params(4);
-    Tyre.Py     = Params(5);
-    Tyre.S_Hy1  = Params(6);
-    Tyre.S_Hy2  = Params(7);
-    Tyre.S_vy   = Params(8);
+    Tyre.Co     = Params(1);
+    Tyre.Do1    = Params(2);
+    Tyre.Do2    = Params(3);
+    Tyre.Eo     = Params(4);
+    Tyre.Po     = Params(5);
+    Tyre.S_Ho1  = Params(6);
+    Tyre.S_Ho2  = Params(7);
+    Tyre.S_vo   = Params(8);
     
     % add resnorm as well
-    Tyre.Resnorm_FY = sqrt(min(resnorm));
+    Tyre.Resnorm_MX = sqrt(min(resnorm));
 
     % add predefined parameters
     Tyre.Fz0 = Fz0;

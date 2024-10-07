@@ -1,10 +1,10 @@
 %%-----------------------------------------------------------------------%%
-% filename:         Pacejka10_FY_Fit.m
+% filename:         MF52_FY_Fit.m
 % author(s):        Niek van Rossem
-% Creation date:    30-09-2024
+% Creation date:    08-10-2024
 %%-----------------------------------------------------------------------%%
 
-function [Tyre, xData, yData, Params] = Pacejka10_FY_Fit(CleanData, Tyre, Settings, f0, Fz0)
+function [Tyre, xData, yData, Params] = MF52_FY_Fit(CleanData, Tyre, Settings, f0, Fz0)
 
     h = figure('Name', 'Parameter convergence');
 
@@ -24,7 +24,7 @@ function [Tyre, xData, yData, Params] = Pacejka10_FY_Fit(CleanData, Tyre, Settin
     Tyre.Camber   = Tyre.Camber(1);
 
     % create input data array
-    xData = horzcat(CleanData.SA(idx)', CleanData.FZ(idx)');
+    xData = horzcat(CleanData.SA(idx)', CleanData.FZ(idx)', CleanData.IA(idx)');
     
     % create output data array
     yData = CleanData.FY(idx)';
@@ -35,13 +35,39 @@ function [Tyre, xData, yData, Params] = Pacejka10_FY_Fit(CleanData, Tyre, Settin
         'TolFun', 1e-10, ...
         'Display', 'off');
     
+    % set scaling factors equal to 1
+    lambda.mu_y = 1;
+    lambda.Cy   = 1;
+    lambda.Hy   = 1;
+    lambda.Vy   = 1;
+
     % define function to be solved for the coefficients
-    func = @(P, X) Pacejka10_model(P, X, Fz0, 1, Settings);
+    func = @(P, X) MF52_FY_model(P, X, Fz0, lambda, Settings);
     
+    % allocate space for parameters
     ParamsIter = zeros(Settings.IterSize, numel(f0));
     
     % create array with titles for figure
-    TitleNames = ["C"; "D_1"; "D_2"; "E"; "P"; "S_{H1}"; "S_{H2}"; "S_V"];
+    TitleNames = [
+        "PCY1"; 
+        "PDY1"; 
+        "PDY2"; 
+        "PDY3"; 
+        "PEY1"; 
+        "PEY2"; 
+        "PEY3"; 
+        "PEY4"; 
+        "PKY1"; 
+        "PKY2"; 
+        "PKY3"; 
+        "PHY1";
+        "PHY2";
+        "PHY3";
+        "PVY1";
+        "PVY2";
+        "PVY3";
+        "PVY4"
+        ];
     
     % Bootstrapping technique
     for k = 1:Settings.IterSize
@@ -61,7 +87,7 @@ function [Tyre, xData, yData, Params] = Pacejka10_FY_Fit(CleanData, Tyre, Settin
         % plot parameter changes
         for n = 1:numel(Params)
             figure(h);
-            subplot(2,4,n);
+            subplot(3,6,n);
             bar([ParamsIter(:,n)], 'group');
             title(TitleNames(n));
             xlim([0 Settings.IterSize+1]);
@@ -87,7 +113,7 @@ function [Tyre, xData, yData, Params] = Pacejka10_FY_Fit(CleanData, Tyre, Settin
         end
     
         % update figure name
-        set(figure(h), 'Name', [' Pacejka10 Free rolling lateral force - Iteration: ', num2str(k), ...
+        set(figure(h), 'Name', [' MF 5.2 Free rolling lateral force - Iteration: ', num2str(k), ...
             ' | RMS ERROR: ', num2str(sqrt(resnorm(k))), ' N']);
     end
         
@@ -98,21 +124,31 @@ function [Tyre, xData, yData, Params] = Pacejka10_FY_Fit(CleanData, Tyre, Settin
     Params = ParamsIter(idx(1),:);
     
     % Add parameters to Tyre structure
-    Tyre.Cy     = Params(1);
-    Tyre.Dy1    = Params(2);
-    Tyre.Dy2    = Params(3);
-    Tyre.Ey     = Params(4);
-    Tyre.Py     = Params(5);
-    Tyre.S_Hy1  = Params(6);
-    Tyre.S_Hy2  = Params(7);
-    Tyre.S_vy   = Params(8);
+    Tyre.PCY1 = Params(1);
+    Tyre.PDY1 = Params(2);
+    Tyre.PDY2 = Params(3);
+    Tyre.PDY3 = Params(4);
+    Tyre.PEY1 = Params(5);
+    Tyre.PEY2 = Params(6);
+    Tyre.PEY3 = Params(7);
+    Tyre.PEY4 = Params(8);
+    Tyre.PKY1 = Params(9);
+    Tyre.PKY2 = Params(10);
+    Tyre.PKY3 = Params(11);
+    Tyre.PHY1 = Params(12);
+    Tyre.PHY2 = Params(13);
+    Tyre.PHY3 = Params(14);
+    Tyre.PVY1 = Params(15);
+    Tyre.PVY2 = Params(16);
+    Tyre.PVY3 = Params(17);
+    Tyre.PVY4 = Params(18);
     
     % add resnorm as well
     Tyre.Resnorm_FY = sqrt(min(resnorm));
 
     % add predefined parameters
     Tyre.Fz0 = Fz0;
-    Tyre.lambda = 1;
+    %Tyre.lambda.mu = 1;
 
 end
 

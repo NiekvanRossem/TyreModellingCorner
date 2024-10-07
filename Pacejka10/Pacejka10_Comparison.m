@@ -24,7 +24,6 @@ function [] = Pacejka10_Comparison(CleanData, xData, yData, Params, Mode, Fz0, S
     elseif Mode == "MX"
         xlabel('SA (deg)');
         ylabel('MX (Nm)');
-
     elseif Mode == "MZ"
         xlabel('SA (deg)');
         ylabel('MZ (Nm)');
