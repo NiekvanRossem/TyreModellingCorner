@@ -33,6 +33,12 @@ function [CleanData, RawData, SummaryData, Figures] = SpliceData(RawData, Settin
             sl_avg = round(mean(NewData.SL),0);                             % slip ratio
             v_avg  = round(mean(NewData.V),1);                              % velocity
             
+            % clean up some raw data channels
+            RawData.FZ(z(i):z(i+1)) = fz_avg;
+            RawData.IA(z(i):z(i+1)) = ia_avg;
+            RawData.P(z(i):z(i+1)) = p_avg;
+            RawData.V(z(i):z(i+1)) = v_avg;
+
             % fit a smoothed spline to the channels that vary
             sp_fx   = csaps(NewData.SA, NewData.FX, Settings.LatSmoothing);
             sp_fy   = csaps(NewData.SA, NewData.FY, Settings.LatSmoothing);

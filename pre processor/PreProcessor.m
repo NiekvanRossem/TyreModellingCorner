@@ -10,7 +10,7 @@ function [Tyre, CleanData, RawData, SummaryData, Figures] = PreProcessor(Setting
     [RawData, Tyre, Figures] = LoadTyreData(Settings);
 
     % Splice data into individual sweeps
-    [ZeroCrossings, Figures] = IdentifySweep(RawData, Figures, Settings);
+    [RawData, ZeroCrossings, Figures] = IdentifySweep(RawData, Figures, Settings);
 
     % Clean up and resample sweeps
     [CleanData, RawData, SummaryData, Figures] = SpliceData(RawData, Settings, Figures, ZeroCrossings);

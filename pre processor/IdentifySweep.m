@@ -4,7 +4,7 @@
 % Creation date:    17-09-2024
 %%-----------------------------------------------------------------------%%
 
-function [z_new, Figures] = IdentifySweep(data, Figures, Settings)
+function [data, z_new, Figures] = IdentifySweep(data, Figures, Settings)
 
     % cornering data
     if data.testid == "Cornering"
@@ -35,6 +35,15 @@ function [z_new, Figures] = IdentifySweep(data, Figures, Settings)
             subplot(4,1,1);
             plot(z_new, x_new, 'r*');
         end
+
+        % % select subset of data corresponding to single sweep
+        % fn = data.channel.name;
+        % 
+        % for i = 1:numel(fn)
+        %     data.(fn{i})(z(1):z(3)) = [];
+        % end
+        % 
+        % z(1:2) = [];
 
     elseif data.testid == "Drive/Brake/Combined"
 

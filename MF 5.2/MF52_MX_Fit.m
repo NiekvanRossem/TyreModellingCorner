@@ -4,7 +4,7 @@
 % Creation date:    08-10-2024
 %%-----------------------------------------------------------------------%%
 
-function [Tyre, xData, yData, Params] = MF52_FY_Fit(CleanData, Tyre, Settings, f0, Fz0)
+function [Tyre, xData, yData, Params] = MF52_MX_Fit(CleanData, Tyre, Settings, f0, Fz0, R0, lambda)
 
     h = figure('Name', 'Parameter convergence');
 
@@ -21,11 +21,15 @@ function [Tyre, xData, yData, Params] = MF52_FY_Fit(CleanData, Tyre, Settings, f
     Tyre.Pressure = unique(CleanData.P(idx));
     Tyre.Pressure = Tyre.Pressure(1);
    
+    Params_FY = [Tyre.PCY1, Tyre.PDY1, Tyre.PDY2, Tyre.PDY3, Tyre.PEY1, Tyre.PEY2, Tyre.PEY3, Tyre.PEY4, Tyre.PKY1, Tyre.PKY2, Tyre.PKY3, Tyre.PHY1, Tyre.PHY2, Tyre.PHY3, Tyre.PVY1, Tyre.PVY2, Tyre.PVY3, Tyre.PVY4];
+
+    FY_new = MF52_FY_model(Params_FY, [CleanData.SA(idx)', CleanData.FZ(idx)', CleanData.IA(idx)'], Fz0, lambda, Settings);
+
     % create input data array
-    xData = horzcat(CleanData.SA(idx)', CleanData.FZ(idx)', CleanData.IA(idx)');
+    xData = horzcat(FY_new, CleanData.FZ(idx)', CleanData.IA(idx)');
     
     % create output data array
-    yData = CleanData.FY(idx)';
+    yData = CleanData.MX(idx)';
     
     % set solver options
     options = optimset( ...
@@ -33,38 +37,17 @@ function [Tyre, xData, yData, Params] = MF52_FY_Fit(CleanData, Tyre, Settings, f
         'TolFun', 1e-10, ...
         'Display', 'off');
     
-    % set scaling factors equal to 1
-    lambda.mu_y = 1;
-    lambda.Cy   = 1;
-    lambda.Hy   = 1;
-    lambda.Vy   = 1;
-
     % define function to be solved for the coefficients
-    func = @(P, X) MF52_FY_model(P, X, Fz0, lambda, Settings);
+    func = @(P, X) MF52_MX_model(P, X, Fz0, R0, lambda);
     
     % allocate space for parameters
     ParamsIter = zeros(Settings.IterSize, numel(f0));
     
     % create array with titles for figure
     TitleNames = [
-        "PCY1"; 
-        "PDY1"; 
-        "PDY2"; 
-        "PDY3"; 
-        "PEY1"; 
-        "PEY2"; 
-        "PEY3"; 
-        "PEY4"; 
-        "PKY1"; 
-        "PKY2"; 
-        "PKY3"; 
-        "PHY1";
-        "PHY2";
-        "PHY3";
-        "PVY1";
-        "PVY2";
-        "PVY3";
-        "PVY4"
+        "QSX1"; 
+        "QSX2"; 
+        "QSX3"; 
         ];
     
     % Bootstrapping technique
@@ -86,7 +69,7 @@ function [Tyre, xData, yData, Params] = MF52_FY_Fit(CleanData, Tyre, Settings, f
         if Settings.PlotFit == "Params"
             for n = 1:numel(Params)
                 figure(h);
-                subplot(3,6,n);
+                subplot(1,3,n);
                 bar([ParamsIter(:,n)], 'group');
                 title(TitleNames(n));
                 xlim([0 Settings.IterSize+1]);
@@ -120,8 +103,8 @@ function [Tyre, xData, yData, Params] = MF52_FY_Fit(CleanData, Tyre, Settings, f
         end
     
         % update figure name
-        set(figure(h), 'Name', [' MF 5.2 Free rolling lateral force - Iteration: ', num2str(k), ...
-            ' | RMS ERROR: ', num2str(sqrt(resnorm(k))), ' N']);
+        set(figure(h), 'Name', [' MF 5.2 Free rolling self-aligning moment - Iteration: ', num2str(k), ...
+            ' | RMS ERROR: ', num2str(sqrt(resnorm(k))), ' Nm']);
     end
         
     % find the best iteration (should be the last)
@@ -131,31 +114,15 @@ function [Tyre, xData, yData, Params] = MF52_FY_Fit(CleanData, Tyre, Settings, f
     Params = ParamsIter(idx(1),:);
     
     % Add parameters to Tyre structure
-    Tyre.PCY1 = Params(1);
-    Tyre.PDY1 = Params(2);
-    Tyre.PDY2 = Params(3);
-    Tyre.PDY3 = Params(4);
-    Tyre.PEY1 = Params(5);
-    Tyre.PEY2 = Params(6);
-    Tyre.PEY3 = Params(7);
-    Tyre.PEY4 = Params(8);
-    Tyre.PKY1 = Params(9);
-    Tyre.PKY2 = Params(10);
-    Tyre.PKY3 = Params(11);
-    Tyre.PHY1 = Params(12);
-    Tyre.PHY2 = Params(13);
-    Tyre.PHY3 = Params(14);
-    Tyre.PVY1 = Params(15);
-    Tyre.PVY2 = Params(16);
-    Tyre.PVY3 = Params(17);
-    Tyre.PVY4 = Params(18);
+    Tyre.QSX1 = Params(1);
+    Tyre.QSX2 = Params(2);
+    Tyre.QSX3 = Params(3);
     
     % add resnorm as well
-    Tyre.Resnorm_FY = sqrt(min(resnorm));
+    Tyre.Resnorm_MX = sqrt(min(resnorm));
 
     % add predefined parameters
     Tyre.Fz0 = Fz0;
-    %Tyre.lambda.mu = 1;
-
+    
 end
 
