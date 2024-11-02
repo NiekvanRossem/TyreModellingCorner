@@ -12,7 +12,7 @@ function Mx = MF52_MX_model(P, X, Fz0, R0, lambda)
     %
     % INPUTS
     % ======
-    % P: 18x1 matrix
+    % P: 3x1 matrix
     %   Set of model parameters:
     %
     % X: Nx2 matrix

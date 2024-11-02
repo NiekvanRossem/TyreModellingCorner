@@ -32,7 +32,7 @@ function Fy = MF52_FY_model(P, X, Fz0, lambda, Settings)
     %       P(16) = PVY2
     %       P(17) = PVY3
     %       P(18) = PVY4
-    % X: Nx2 matrix
+    % X: Nx3 matrix
     %   Set of input states (N is the size of the input array you would
     %   like to have evaluated)
     %       X(:,1) = S  -> slip ratio or slip angle

@@ -52,12 +52,20 @@ Settings.maxSA = 12;
 Settings.Convention = "ISO_B";
 
 % set scaling factors equal to 1
-lambda.VMx  = 1;
-lambda.Mx   = 1;
-lambda.mu_y = 1;
-lambda.Cy   = 1;
-lambda.Hy   = 1;
-lambda.Vy   = 1;
+L.VMx  = 1;
+L.Mx   = 1;
+L.mu_y = 1;
+L.Cy   = 1;
+L.Hy   = 1;
+L.Ky   = 1;
+L.Vy   = 1;
+L.gamma_z = 1;
+L.t    = 1;
+L.r    = 1;
+
+% set nominal load and unloaded radius
+Fz0 = 600;
+R0  = 25.4e-3*16.2/2;
 
 %% Run pre-processor
 
@@ -75,7 +83,7 @@ Settings.IterSize = 10;
 Settings.Comparison = "RawData";
 
 % set to either RMS or Params
-Settings.PlotFit = "Params";
+Settings.PlotFit = "RMS";
 
 % set mutation parameter
 Settings.eps = 1;
@@ -83,34 +91,34 @@ Settings.eps = 1;
 % initial guess
 f0 = [-1.46859292446447	2.44547091658186	-0.0854236168263387	0.00425355198117579	0.0340054622459096	0.0192616771841150	0.00752820167020071	-0.00584802094004550	6.32604883095372	0.516853039167581	0.0181586432843216	-0.944886096012145	-0.141144405841843	-0.115324555428606	0.0273592579662892	0.0350866492929921	-0.00324304228124246	-0.00518356355315014];
 
-% set nominal load
-Fz0 = 600;
-R0  = 25.4e-3*16.2/2;
-
 % fit
 [Tyre, xData, yData, Params] = MF52_FY_Fit(CleanData, Tyre, Settings, f0, Fz0);
 
 % compare result
 MF52_Comparison(RawData, CleanData, xData, yData, Params, "FY", Fz0, R0, Tyre, Settings);
 
+clear f0 xData yData Params;
+
 %% MF 5.2 Overturning moment fitting
 
 % set number of iterations
-Settings.IterSize = 50;
+Settings.IterSize = 10;
 
 % set mutation parameter
 Settings.eps = 1;
 
 % initial guess
-f0 = [0 0 0];
+f0 = [-0.02 0.344 100];
 
 % fit
-[Tyre, xData, yData, Params] = MF52_MX_Fit(CleanData, Tyre, Settings, f0, Fz0, R0, lambda);
+[Tyre, xData, yData, Params] = MF52_MX_Fit(CleanData, Tyre, Settings, f0, Fz0, R0, L);
 
 % compare result
 MF52_Comparison(RawData, CleanData, xData, yData, Params, "MX", Fz0, R0, Tyre, Settings);
 
-%% PACE5 Self aligning moment fitting
+clear f0 xData yData Params;
+
+%% MF 5.2 Self aligning moment fitting
 
 % set number of iterations
 Settings.IterSize = 50;
@@ -119,10 +127,10 @@ Settings.IterSize = 50;
 Settings.eps = 1;
 
 % initial guess
-f0 = [1, -4.4, -1.2, 10.3, 0.5, 0, 0, 0];
+f0 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 % fit
-[Tyre, xData, yData, Params] = MF52_MZ_Fit(CleanData, Tyre, Settings, f0, Fz0);
+[Tyre, xData, yData, Params] = MF52_MZ_Fit(CleanData, Tyre, Settings, f0, Fz0, L);
 
 % compare result
 MF52_Comparison(CleanData, xData, yData, Params, "MZ", 600, Settings);
