@@ -62,7 +62,8 @@ function Mz = MF52_MZ_model(P, X, Tyre, Fz0, R0, lambda)
     % input state
     Fy    = X(:,1);
     Fz    = X(:,2);
-    gamma = X(:,3);
+    alpha = X(:,3);
+    gamma = X(:,4);
 
     % normalised load
     dFz = (Fz - Fz0)./Fz0;

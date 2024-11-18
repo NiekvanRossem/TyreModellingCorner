@@ -28,7 +28,7 @@ function [Tyre, xData, yData, Params] = MF52_MZ_Fit(CleanData, Tyre, Settings, f
     FY_new = MF52_FY_model(Params_FY, [CleanData.SA(idx)', CleanData.FZ(idx)', CleanData.IA(idx)'], Fz0, lambda, Settings);
   
     % create input data array
-    xData = horzcat(FY_new, CleanData.FZ(idx)', CleanData.IA(idx)');
+    xData = horzcat(FY_new, CleanData.FZ(idx)', CleanData.SA(idx)', CleanData.IA(idx)');
     
     % create output data array
     yData = CleanData.MZ(idx)';

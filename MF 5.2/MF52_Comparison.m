@@ -4,7 +4,7 @@
 % Creation date:    08-10-2024
 %%-----------------------------------------------------------------------%%
 
-function [] = MF52_Comparison(RawData, CleanData, xData, yData, Params, Mode, Fz0, R0, Tyre, Settings)
+function [] = MF52_Comparison(RawData, CleanData, xData, yData, Params, Mode, Fz0, R0, lambda, Tyre, Settings)
     %% Documentation
     %
     %
@@ -58,12 +58,12 @@ function [] = MF52_Comparison(RawData, CleanData, xData, yData, Params, Mode, Fz
         xline(0, 'k'); yline(0, 'k');
 
     % set scaling factors equal to 1
-    lambda.mu_y = 1;
-    lambda.Cy   = 1;
-    lambda.Hy   = 1;
-    lambda.Vy   = 1;
-    lambda.VMx  = 1;
-    lambda.Mx   = 1;
+    % lambda.mu_y = 1;
+    % lambda.Cy   = 1;
+    % lambda.Hy   = 1;
+    % lambda.Vy   = 1;
+    % lambda.VMx  = 1;
+    % lambda.Mx   = 1;
 
     % find data for first camber angle
     if Settings.Comparison == "RawData"
@@ -77,7 +77,6 @@ function [] = MF52_Comparison(RawData, CleanData, xData, yData, Params, Mode, Fz
         newDataX2 = [RawData.SA(idx2), RawData.FZ(idx2)];
         newDataX3 = [RawData.SA(idx3), RawData.FZ(idx3)];
         
-
         if Mode == "FY"
             newDataY1 = RawData.FY(idx1);
             newDataY2 = RawData.FY(idx2);
@@ -86,17 +85,42 @@ function [] = MF52_Comparison(RawData, CleanData, xData, yData, Params, Mode, Fz
             newDataY1 = RawData.MX(idx1);
             newDataY2 = RawData.MX(idx2);
             newDataY3 = RawData.MX(idx3);
+        elseif Mode == "MZ"
+            newDataY1 = RawData.MZ(idx1);
+            newDataY2 = RawData.MZ(idx2);
+            newDataY3 = RawData.MZ(idx3);
         end
-
-        % find vertical loads
-        verticalLoad1 = unique(newDataX1(:,2));
-        verticalLoad2 = unique(newDataX2(:,2));
-        verticalLoad3 = unique(newDataX3(:,2));
 
     elseif Settings.Comparison == "CleanData"
         
-        camberAngle  = unique(xData(:,3));
+        camberAngle  = unique(xData(:,4));
+        idx1 = find(CleanData.IA == camberAngle(1));
+        idx2 = find(CleanData.IA == camberAngle(2));
+        idx3 = find(CleanData.IA == camberAngle(3));
+        
+        newDataX1 = [CleanData.SA(idx1)', CleanData.FZ(idx1)'];        
+        newDataX2 = [CleanData.SA(idx2)', CleanData.FZ(idx2)'];
+        newDataX3 = [CleanData.SA(idx3)', CleanData.FZ(idx3)'];
+        
+        if Mode == "FY"
+            newDataY1 = CleanData.FY(idx1)';
+            newDataY2 = CleanData.FY(idx2)';
+            newDataY3 = CleanData.FY(idx3)';
+        elseif Mode == "MX"
+            newDataY1 = CleanData.MX(idx1)';
+            newDataY2 = CleanData.MX(idx2)';
+            newDataY3 = CleanData.MX(idx3)';
+        elseif Mode == "MZ"
+            newDataY1 = CleanData.MZ(idx1)';
+            newDataY2 = CleanData.MZ(idx2)';
+            newDataY3 = CleanData.MZ(idx3)';
+        end
     end
+
+    % find vertical loads
+    verticalLoad1 = unique(newDataX1(:,2));
+    verticalLoad2 = unique(newDataX2(:,2));
+    verticalLoad3 = unique(newDataX3(:,2));
 
     % slip angle vector
     sa = linspace(-15, 15, 100)';
@@ -110,24 +134,21 @@ function [] = MF52_Comparison(RawData, CleanData, xData, yData, Params, Mode, Fz
         idx = find(newDataX1(:,2) == verticalLoad1(n));
         
         if Mode == "FY"
-
-            % calculate Fy from fit
             out = MF52_FY_model(Params, [sa, verticalLoad1(n)*ones(size(sa)), camberAngle(1)*ones(size(sa))], Fz0, lambda, Settings);
 
-        % calculate Mx from fit
         elseif Mode == "MX"
-
-            % calculate Fy from fit
             Fy  = MF52_FY_model(Params_FY, [sa, verticalLoad1(n)*ones(size(sa)), camberAngle(1)*ones(size(sa))], Fz0, lambda, Settings);
-            
-            % calculate Mx from fit
             out = MF52_MX_model(Params, [Fy, verticalLoad1(n)*ones(size(sa)), camberAngle(1)*ones(size(sa))], Fz0, R0, lambda);
+
+        elseif Mode == "MZ"
+            Fy  = MF52_FY_model(Params_FY, [sa, verticalLoad1(n)*ones(size(sa)), camberAngle(1)*ones(size(sa))], Fz0, lambda, Settings);
+            out = MF52_MZ_model(Params, [Fy, verticalLoad1(n)*ones(size(sa)), sa, camberAngle(1)*ones(size(sa))], Tyre, Fz0, R0, lambda);
 
         end
 
         % plot data and fit
         figure(F1);
-        plot(newDataX1(idx,1), newDataY1(idx), 'Color', '#77ac30', 'Marker', '.', 'MarkerSize', 2, 'LineStyle', 'none');
+        plot(newDataX1(idx,1), newDataY1(idx), 'Color', '#77ac30', 'Marker', 'o', 'MarkerSize', 6, 'LineStyle', 'none');
         plot(sa, out, 'b-');
 
     end
@@ -145,6 +166,13 @@ function [] = MF52_Comparison(RawData, CleanData, xData, yData, Params, Mode, Fz
         elseif Mode == "MX"
             Fy  = MF52_FY_model(Params_FY, [sa, verticalLoad2(n)*ones(size(sa)), camberAngle(2)*ones(size(sa))], Fz0, lambda, Settings);
             out = MF52_MX_model(Params, [Fy, verticalLoad2(n)*ones(size(sa)), camberAngle(2)*ones(size(sa))], Fz0, R0, lambda);
+        elseif Mode == "MZ"
+
+            % calculate Fy from fit
+            Fy  = MF52_FY_model(Params_FY, [sa, verticalLoad2(n)*ones(size(sa)), camberAngle(2)*ones(size(sa))], Fz0, lambda, Settings);
+            
+            % calculate Mx from fit
+            out = MF52_MZ_model(Params, [Fy, verticalLoad2(n)*ones(size(sa)), sa, camberAngle(2)*ones(size(sa))], Tyre, Fz0, R0, lambda);
         end
 
         % plot data and fit
@@ -168,6 +196,15 @@ function [] = MF52_Comparison(RawData, CleanData, xData, yData, Params, Mode, Fz
 
             Fy  = MF52_FY_model(Params_FY, [sa, verticalLoad3(n)*ones(size(sa)), camberAngle(3)*ones(size(sa))], Fz0, lambda, Settings);
             out = MF52_MX_model(Params, [Fy, verticalLoad3(n)*ones(size(sa)), camberAngle(3)*ones(size(sa))], Fz0, R0, lambda);
+
+        
+        elseif Mode == "MZ"
+
+            % calculate Fy from fit
+            Fy  = MF52_FY_model(Params_FY, [sa, verticalLoad3(n)*ones(size(sa)), camberAngle(3)*ones(size(sa))], Fz0, lambda, Settings);
+            
+            % calculate Mx from fit
+            out = MF52_MZ_model(Params, [Fy, verticalLoad3(n)*ones(size(sa)), sa, camberAngle(3)*ones(size(sa))], Tyre, Fz0, R0, lambda);
 
         end
 

@@ -21,7 +21,7 @@ set(0,'DefaultFigureWindowStyle','docked');
 % Import settings
 Settings = Settings();
 
-Settings.StepSize = 0.1;
+Settings.StepSize = 1;
 
 % add units used to settings structure
 Settings.AngleUnit = "deg";
@@ -80,22 +80,22 @@ Tyre.Convention = Settings.Convention;
 Settings.IterSize = 10;
 
 % set to either RawData or CleanData
-Settings.Comparison = "RawData";
+Settings.Comparison = "CleanData";
 
 % set to either RMS or Params
-Settings.PlotFit = "RMS";
+Settings.PlotFit = "Params";
 
 % set mutation parameter
 Settings.eps = 1;
 
 % initial guess
-f0 = [-1.46859292446447	2.44547091658186	-0.0854236168263387	0.00425355198117579	0.0340054622459096	0.0192616771841150	0.00752820167020071	-0.00584802094004550	6.32604883095372	0.516853039167581	0.0181586432843216	-0.944886096012145	-0.141144405841843	-0.115324555428606	0.0273592579662892	0.0350866492929921	-0.00324304228124246	-0.00518356355315014];
+f0 = zeros(1,18);
 
 % fit
 [Tyre, xData, yData, Params] = MF52_FY_Fit(CleanData, Tyre, Settings, f0, Fz0);
 
 % compare result
-MF52_Comparison(RawData, CleanData, xData, yData, Params, "FY", Fz0, R0, Tyre, Settings);
+MF52_Comparison(RawData, CleanData, xData, yData, Params, "FY", Fz0, R0, L, Tyre, Settings);
 
 clear f0 xData yData Params;
 
@@ -108,13 +108,13 @@ Settings.IterSize = 10;
 Settings.eps = 1;
 
 % initial guess
-f0 = [-0.02 0.344 100];
+f0 = zeros(1,3);
 
 % fit
 [Tyre, xData, yData, Params] = MF52_MX_Fit(CleanData, Tyre, Settings, f0, Fz0, R0, L);
 
 % compare result
-MF52_Comparison(RawData, CleanData, xData, yData, Params, "MX", Fz0, R0, Tyre, Settings);
+MF52_Comparison(RawData, CleanData, xData, yData, Params, "MX", Fz0, R0, L, Tyre, Settings);
 
 clear f0 xData yData Params;
 
@@ -127,14 +127,15 @@ Settings.IterSize = 50;
 Settings.eps = 1;
 
 % initial guess
-f0 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+f0 = zeros(1,25);
 
 % fit
-[Tyre, xData, yData, Params] = MF52_MZ_Fit(CleanData, Tyre, Settings, f0, Fz0, L);
+[Tyre, xData, yData, Params] = MF52_MZ_Fit(CleanData, Tyre, Settings, f0, Fz0, R0, L);
 
 % compare result
-MF52_Comparison(CleanData, xData, yData, Params, "MZ", 600, Settings);
+MF52_Comparison(RawData, CleanData, xData, yData, Params, "MZ", Fz0, R0, L, Tyre, Settings)
 
+clear f0 xData yData Params;
 %% Pneumatic trail
 
 % create dependent variable grid
